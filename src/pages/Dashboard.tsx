@@ -15,10 +15,12 @@ import { ContentPanel } from '@/components/panels/ContentPanel';
 import { FlowchartPanel } from '@/components/panels/FlowchartPanel';
 import { AgentsPanel } from '@/components/panels/AgentsPanel';
 import { AnimationPanel } from '@/components/panels/AnimationPanel';
+import { TestLabPanel } from '@/components/panels/TestLabPanel';
 import { ShortcutsPanel } from '@/devtools/components/ShortcutsPanel';
 import { StyleGuidePanel } from '@/devtools/components/StyleGuidePanel';
 import { PanelGeneratorPanel } from '@/devtools/components/PanelGeneratorPanel';
 import { ExportPanel } from '@/devtools/components/ExportPanel';
+import { SettingsPanel } from '@/devtools/components/SettingsPanel';
 import { useAppStore } from '@/stores/appStore';
 import { Terminal } from 'lucide-react';
 import { DEVTOOLS_SECTIONS } from '@/config/sections';
@@ -82,6 +84,8 @@ export default function Dashboard() {
         return <AgentsPanel />;
       case 'video':
         return <AnimationPanel />;
+      case 'testlab':
+        return <TestLabPanel />;
       case 'shortcuts':
         return <ShortcutsPanel />;
       case 'styleguide':
@@ -90,6 +94,8 @@ export default function Dashboard() {
         return <PanelGeneratorPanel />;
       case 'export':
         return <ExportPanel />;
+      case 'settings':
+        return <SettingsPanel />;
       default: {
         const section = DEVTOOLS_SECTIONS.find(s => s.id === activeSection);
         const Icon = section?.icon || Terminal;

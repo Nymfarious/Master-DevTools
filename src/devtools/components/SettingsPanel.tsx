@@ -1,8 +1,7 @@
-// Settings Panel - DevTools configuration
-import { Settings, RefreshCw, Eye, Activity, Beaker, Bot, Code, Upload, ChevronDown, Plus, MoreHorizontal, Zap, Palette, Keyboard, Info } from 'lucide-react';
+// Settings Panel v3.0.0 - DevTools configuration with auth bypass and connection control
+import { Settings, RefreshCw, Eye, Activity, Beaker, Bot, Code, Upload, ChevronDown, Plus, MoreHorizontal, Zap, Palette, Keyboard, Info, ShieldOff, Unplug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSettingsStore, type ExpandIconStyle } from '../stores/settingsStore';
@@ -10,6 +9,7 @@ import { RoleSwitcher } from './RoleSwitcher';
 import { BlockSignupsToggle } from './BlockSignupsToggle';
 import { GuestModeToggle } from './GuestModeToggle';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
+import { cn } from '@/lib/utils';
 
 interface SettingRowProps {
   icon: React.ElementType;
@@ -17,16 +17,29 @@ interface SettingRowProps {
   description: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
+  variant?: 'default' | 'warning' | 'danger';
 }
 
-function SettingRow({ icon: Icon, label, description, checked, onCheckedChange }: SettingRowProps) {
+function SettingRow({ icon: Icon, label, description, checked, onCheckedChange, variant = 'default' }: SettingRowProps) {
   return (
-    <div className="flex items-center justify-between py-3">
+    <div className={cn(
+      "flex items-center justify-between py-3",
+      variant === 'warning' && checked && "bg-signal-amber/5 -mx-3 px-3 rounded-lg",
+      variant === 'danger' && checked && "bg-signal-red/5 -mx-3 px-3 rounded-lg"
+    )}>
       <div className="flex items-start gap-3">
-        <Icon className="w-4 h-4 mt-0.5 text-muted-foreground" />
+        <Icon className={cn(
+          "w-4 h-4 mt-0.5",
+          variant === 'warning' && checked ? "text-signal-amber" : 
+          variant === 'danger' && checked ? "text-signal-red" : "text-muted-foreground"
+        )} />
         <div>
           <p className="text-sm font-medium text-foreground">{label}</p>
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className={cn(
+            "text-xs",
+            variant === 'warning' && checked ? "text-signal-amber" :
+            variant === 'danger' && checked ? "text-signal-red" : "text-muted-foreground"
+          )}>{description}</p>
         </div>
       </div>
       <Switch checked={checked} onCheckedChange={onCheckedChange} />
@@ -75,6 +88,37 @@ export function SettingsPanel() {
               <RoleSwitcher />
             </div>
           </section>
+
+          {/* Connection Control - NEW in v3.0.0 */}
+          <CollapsibleSection title="Connection Control" icon={Unplug} defaultOpen>
+            <div className="space-y-3">
+              <SettingRow
+                icon={Unplug}
+                label="Suspend All Connections"
+                description="Stops all API calls, health checks, and polling"
+                checked={settings.suspendConnections || false}
+                onCheckedChange={(checked) => updateSettings({ suspendConnections: checked })}
+                variant="warning"
+              />
+              
+              <SettingRow
+                icon={ShieldOff}
+                label="Auth Bypass Mode"
+                description="⚠️ DANGER: Skips all authentication checks"
+                checked={settings.authBypass || false}
+                onCheckedChange={(checked) => updateSettings({ authBypass: checked })}
+                variant="danger"
+              />
+              
+              {settings.authBypass && (
+                <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30">
+                  <p className="text-xs text-signal-red font-mono">
+                    ⚠️ Auth bypass is enabled. Do NOT use in production!
+                  </p>
+                </div>
+              )}
+            </div>
+          </CollapsibleSection>
 
           {/* Appearance */}
           <CollapsibleSection title="Appearance" icon={Palette} defaultOpen>
@@ -238,7 +282,7 @@ export function SettingsPanel() {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Version</span>
-                <span className="text-signal-green font-mono">2.2.0</span>
+                <span className="text-signal-green font-mono">3.0.0</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Build</span>

@@ -24,7 +24,8 @@ export type SectionId =
   | 'styleguide'
   | 'generator'
   | 'export'
-  | 'settings';
+  | 'settings'
+  | 'testlab';
 
 export interface DevToolsSection {
   id: SectionId;
