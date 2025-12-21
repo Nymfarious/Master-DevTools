@@ -16,6 +16,7 @@ import { FlowchartPanel } from '@/components/panels/FlowchartPanel';
 import { AgentsPanel } from '@/components/panels/AgentsPanel';
 import { AnimationPanel } from '@/components/panels/AnimationPanel';
 import { TestLabPanel } from '@/components/panels/TestLabPanel';
+import { MediaMonitorPanel } from '@/components/panels/MediaMonitorPanel';
 import { ShortcutsPanel } from '@/devtools/components/ShortcutsPanel';
 import { StyleGuidePanel } from '@/devtools/components/StyleGuidePanel';
 import { PanelGeneratorPanel } from '@/devtools/components/PanelGeneratorPanel';
@@ -23,7 +24,7 @@ import { ExportPanel } from '@/devtools/components/ExportPanel';
 import { SettingsPanel } from '@/devtools/components/SettingsPanel';
 import { useAppStore } from '@/stores/appStore';
 import { Terminal } from 'lucide-react';
-import { DEVTOOLS_SECTIONS } from '@/config/sections';
+import { ALL_SECTIONS } from '@/config/sections';
 
 export default function Dashboard() {
   const { user, isAdmin, isLoading } = useAuth();
@@ -58,22 +59,47 @@ export default function Dashboard() {
 
   const renderPanel = () => {
     switch (activeSection) {
+      // MONITORING (Passive)
       case 'overview':
         return <OverviewPanel />;
+      case 'apps':
+        return <AppLauncherPanel />;
       case 'logs':
         return <LogsPanel />;
-      case 'tokens':
-        return <UITokensPanel />;
       case 'pipeline':
         return <PipelinePanel />;
-      case 'apis':
-        return <APIRegistryPanel />;
+      case 'media':
+        return <MediaMonitorPanel />;
       case 'security':
         return <SecurityPanel />;
-      case 'data':
-        return <DataTestPanel />;
+      case 'apis':
+        return <APIRegistryPanel />;
+      
+      // TESTING (Active)
+      case 'testing':
+        return <TestLabPanel />;
+      
+      // REFERENCE
+      case 'styleguide':
+        return <StyleGuidePanel />;
+      case 'shortcuts':
+        return <ShortcutsPanel />;
       case 'libraries':
         return <LibrariesPanel />;
+      
+      // TOOLS
+      case 'generator':
+        return <PanelGeneratorPanel />;
+      case 'export':
+        return <ExportPanel />;
+      case 'settings':
+        return <SettingsPanel />;
+      
+      // LEGACY - kept for backwards compatibility
+      case 'tokens':
+        return <UITokensPanel />;
+      case 'data':
+        return <DataTestPanel />;
       case 'audio':
         return <AudioPanel />;
       case 'content':
@@ -86,18 +112,9 @@ export default function Dashboard() {
         return <AnimationPanel />;
       case 'testlab':
         return <TestLabPanel />;
-      case 'shortcuts':
-        return <ShortcutsPanel />;
-      case 'styleguide':
-        return <StyleGuidePanel />;
-      case 'generator':
-        return <PanelGeneratorPanel />;
-      case 'export':
-        return <ExportPanel />;
-      case 'settings':
-        return <SettingsPanel />;
+      
       default: {
-        const section = DEVTOOLS_SECTIONS.find(s => s.id === activeSection);
+        const section = ALL_SECTIONS.find(s => s.id === activeSection);
         const Icon = section?.icon || Terminal;
         return (
           <div className="flex flex-col items-center justify-center h-96 text-center boot-sequence">
@@ -108,7 +125,7 @@ export default function Dashboard() {
               {section?.label || 'Panel'}
             </h3>
             <p className="text-sm text-muted-foreground">{section?.description}</p>
-            <span className="mt-4 badge badge--muted">Coming in Phase {section?.phase || '?'}</span>
+            <span className="mt-4 badge badge--muted">Coming Soon</span>
           </div>
         );
       }
@@ -116,4 +133,21 @@ export default function Dashboard() {
   };
 
   return <AppShell>{renderPanel()}</AppShell>;
+}
+
+// App Launcher Panel - inline for now
+import { EchoverseApps } from '@/components/overview/EchoverseApps';
+
+function AppLauncherPanel() {
+  return (
+    <div className="space-y-4 boot-sequence">
+      <div>
+        <h1 className="text-lg font-display font-semibold text-foreground">App Launcher</h1>
+        <p className="text-sm text-muted-foreground">
+          Connect to Echoverse applications
+        </p>
+      </div>
+      <EchoverseApps />
+    </div>
+  );
 }

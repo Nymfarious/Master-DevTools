@@ -33,7 +33,7 @@ export interface SectionCategory {
 // MONITORING SECTIONS (6 panels)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const MONITORING_SECTIONS: DevToolsSection[] = [
+export const MONITORING_SECTIONS: DevToolsSection[] = [
   {
     id: 'overview',
     label: 'Overview',
@@ -88,7 +88,7 @@ const MONITORING_SECTIONS: DevToolsSection[] = [
 // TESTING SECTIONS (1 consolidated panel)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const TESTING_SECTIONS: DevToolsSection[] = [
+export const TESTING_SECTIONS: DevToolsSection[] = [
   {
     id: 'testlab',
     label: 'Test Lab',
@@ -103,7 +103,7 @@ const TESTING_SECTIONS: DevToolsSection[] = [
 // REFERENCE SECTIONS (7 panels including previously unlisted)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const REFERENCE_SECTIONS: DevToolsSection[] = [
+export const REFERENCE_SECTIONS: DevToolsSection[] = [
   {
     id: 'styleguide',
     label: 'Style Guide',
@@ -166,7 +166,7 @@ const REFERENCE_SECTIONS: DevToolsSection[] = [
 // TOOLS SECTIONS (3 panels)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const TOOLS_SECTIONS: DevToolsSection[] = [
+export const TOOLS_SECTIONS: DevToolsSection[] = [
   {
     id: 'generator',
     label: 'Generator',
@@ -212,6 +212,9 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
   ...REFERENCE_SECTIONS,
   ...TOOLS_SECTIONS,
 ];
+
+// Alias for v3.1.0
+export const ALL_SECTIONS = DEVTOOLS_SECTIONS;
 
 // Legacy exports for compatibility
 export const MAIN_SECTIONS = DEVTOOLS_SECTIONS.slice(0, 7);

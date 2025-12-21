@@ -155,6 +155,8 @@ export const GeneratorPanel = () => <PlaceholderPanel sectionId="generator" />;
 export const ExportPanelMini = () => <PlaceholderPanel sectionId="export" />;
 export const SettingsPanel = () => <PlaceholderPanel sectionId="settings" />;
 export const TestLabPanel = () => <PlaceholderPanel sectionId="testlab" />;
+export const MediaMonitorPanel = () => <PlaceholderPanel sectionId="media" />;
+export const TestingPanel = () => <PlaceholderPanel sectionId="testing" />;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PANEL ROUTER
@@ -181,6 +183,8 @@ const panelComponents: Record<SectionId, React.ComponentType<PanelProps>> = {
   export: ExportPanelMini,
   settings: SettingsPanel,
   testlab: TestLabPanel,
+  media: MediaMonitorPanel,
+  testing: TestingPanel,
 };
 
 export function PanelRouter({ activeSection }: { activeSection: SectionId }) {

@@ -6,32 +6,42 @@ import { ComponentType } from 'react';
 // ═══════════════════════════════════════════════════════════════════════════
 
 export type SectionId = 
+  // MONITORING (passive)
   | 'overview'
   | 'apps'
-  | 'apis'
   | 'logs'
   | 'pipeline'
+  | 'media'      // NEW: Media Monitor
   | 'security'
+  | 'apis'
+  // TESTING (active)
+  | 'testing'    // NEW: Test Lab (renamed from testlab)
+  // REFERENCE
+  | 'styleguide'
+  | 'shortcuts'
+  | 'libraries'
+  // TOOLS
+  | 'generator'
+  | 'export'
+  | 'settings'
+  // LEGACY (kept for compatibility)
   | 'data'
   | 'tokens'
   | 'flowchart'
   | 'agents'
   | 'audio'
   | 'video'
-  | 'libraries'
   | 'content'
-  | 'shortcuts'
-  | 'styleguide'
-  | 'generator'
-  | 'export'
-  | 'settings'
   | 'testlab';
+
+export type SectionCategory = 'monitoring' | 'testing' | 'reference' | 'tools';
 
 export interface DevToolsSection {
   id: SectionId;
   label: string;
   icon: LucideIcon;
   description: string;
+  category?: SectionCategory; // Optional for backwards compatibility
   shortcut?: string;
   phase?: number;
   badge?: {
