@@ -1,0 +1,319 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Mission Control Terminal Colors - Exact Hex Mapping */
+    /* Background: #0a0e14 → HSL 216 28% 5% */
+    /* Surface: #0d1117 → HSL 215 28% 7% */
+    /* Elevated: #161b22 → HSL 215 19% 11% */
+    /* Border: #21262d → HSL 214 16% 15% */
+    /* Muted: #484f58 → HSL 214 8% 31% */
+    
+    --terminal-bg: 216 28% 5%;
+    --terminal-surface: 215 28% 7%;
+    --terminal-elevated: 215 19% 11%;
+    --terminal-border: 214 16% 15%;
+    --terminal-muted: 214 8% 31%;
+
+    /* Signal colors - exact from spec */
+    /* Green: #3fb950 → HSL 130 55% 48% */
+    /* Amber: #d29922 → HSL 41 73% 48% */
+    /* Red: #f85149 → HSL 3 92% 62% */
+    /* Blue: #58a6ff → HSL 212 100% 67% */
+    /* Purple: #a371f7 → HSL 267 88% 71% */
+    /* Cyan: #39c5cf → HSL 184 57% 51% */
+    --signal-green: 130 55% 48%;
+    --signal-amber: 41 73% 48%;
+    --signal-red: 3 92% 62%;
+    --signal-blue: 212 100% 67%;
+    --signal-purple: 267 88% 71%;
+    --signal-cyan: 184 57% 51%;
+
+    /* Phosphor glow */
+    --phosphor-dim: 130 55% 48% / 0.15;
+    --phosphor-glow: 130 55% 48% / 0.4;
+
+    /* Semantic tokens mapped to terminal */
+    --background: 216 28% 5%;
+    --foreground: 0 0% 95%;
+    
+    --card: 215 28% 7%;
+    --card-foreground: 0 0% 95%;
+    
+    --popover: 215 28% 7%;
+    --popover-foreground: 0 0% 95%;
+    
+    --primary: 130 55% 48%;
+    --primary-foreground: 216 28% 5%;
+    
+    --secondary: 215 19% 11%;
+    --secondary-foreground: 0 0% 95%;
+    
+    --muted: 215 19% 11%;
+    --muted-foreground: 214 8% 50%;
+    
+    --accent: 212 100% 67%;
+    --accent-foreground: 216 28% 5%;
+    
+    --destructive: 3 92% 62%;
+    --destructive-foreground: 0 0% 95%;
+    
+    --border: 214 16% 15%;
+    --input: 214 16% 15%;
+    --ring: 130 55% 48%;
+    
+    --radius: 0.75rem;
+    
+    --sidebar-background: 215 28% 7%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 130 55% 48%;
+    --sidebar-primary-foreground: 216 28% 5%;
+    --sidebar-accent: 215 19% 11%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 214 16% 15%;
+    --sidebar-ring: 130 55% 48%;
+  }
+
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--terminal-border)) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--terminal-border));
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--terminal-muted));
+  }
+
+  body {
+    @apply bg-background text-foreground font-display;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Terminal glass effect */
+  .terminal-glass {
+    @apply bg-card/95 backdrop-blur-xl;
+    @apply border border-border;
+    @apply shadow-terminal;
+    background-image: 
+      linear-gradient(to bottom, hsla(0, 0%, 100%, 0.02) 0%, transparent 100%);
+  }
+
+  /* Scanline overlay */
+  .scanlines::after {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsla(0, 0%, 0%, 0.1) 2px,
+      hsla(0, 0%, 0%, 0.1) 4px
+    );
+  }
+
+  /* Status indicator lights */
+  .status-light {
+    @apply w-2 h-2 rounded-full transition-all duration-300;
+  }
+
+  .status-light--green {
+    @apply bg-signal-green;
+    box-shadow: 0 0 8px hsl(var(--signal-green)), 0 0 2px hsl(var(--signal-green));
+  }
+
+  .status-light--amber {
+    @apply bg-signal-amber;
+    box-shadow: 0 0 8px hsl(var(--signal-amber)), 0 0 2px hsl(var(--signal-amber));
+  }
+
+  .status-light--red {
+    @apply bg-signal-red animate-pulse;
+    box-shadow: 0 0 8px hsl(var(--signal-red)), 0 0 2px hsl(var(--signal-red));
+  }
+
+  .status-light--blue {
+    @apply bg-signal-blue;
+    box-shadow: 0 0 8px hsl(var(--signal-blue)), 0 0 2px hsl(var(--signal-blue));
+  }
+
+  /* Red dot notification badge */
+  .red-dot {
+    @apply absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-signal-red animate-pulse;
+    box-shadow: 0 0 8px hsl(var(--signal-red));
+  }
+
+  /* Console-style text input */
+  .terminal-input {
+    @apply bg-background border border-border rounded;
+    @apply px-3 py-2 text-sm font-mono;
+    @apply text-foreground placeholder:text-muted-foreground;
+    @apply focus:outline-none focus:border-signal-blue focus:ring-1 focus:ring-signal-blue/50;
+    @apply transition-all duration-200;
+  }
+
+  /* Monospace data display */
+  .data-display {
+    @apply font-data text-sm;
+    @apply bg-background/50 rounded px-2 py-1;
+    @apply text-signal-cyan;
+  }
+
+  /* Section header style */
+  .section-header {
+    @apply flex items-center gap-2;
+    @apply text-xs font-mono uppercase tracking-widest;
+    @apply text-muted-foreground;
+    @apply pb-2 mb-3;
+    @apply border-b border-border/50;
+  }
+
+  /* Icon button in the rail */
+  .rail-button {
+    @apply w-10 h-10 rounded-lg;
+    @apply flex items-center justify-center;
+    @apply text-muted-foreground;
+    @apply transition-all duration-200;
+    @apply hover:text-foreground hover:bg-secondary;
+    @apply focus:outline-none focus:ring-2 focus:ring-signal-blue/50;
+    @apply relative;
+  }
+
+  .rail-button--active {
+    @apply text-signal-blue bg-signal-blue/10;
+    @apply ring-1 ring-signal-blue/30;
+  }
+
+  /* Card component */
+  .dev-card {
+    @apply bg-secondary/50 rounded-lg;
+    @apply border border-border/50;
+    @apply p-4;
+    @apply transition-all duration-200;
+    @apply hover:border-border;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-mono;
+  }
+
+  .badge--green {
+    @apply bg-signal-green/20 text-signal-green border border-signal-green/30;
+  }
+
+  .badge--amber {
+    @apply bg-signal-amber/20 text-signal-amber border border-signal-amber/30;
+  }
+
+  .badge--red {
+    @apply bg-signal-red/20 text-signal-red border border-signal-red/30;
+  }
+
+  .badge--blue {
+    @apply bg-signal-blue/20 text-signal-blue border border-signal-blue/30;
+  }
+
+  .badge--purple {
+    @apply bg-signal-purple/20 text-signal-purple border border-signal-purple/30;
+  }
+
+  .badge--muted {
+    @apply bg-muted/20 text-muted-foreground border border-muted-foreground/30;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    @apply absolute left-full ml-2 px-2 py-1;
+    @apply bg-secondary border border-border rounded;
+    @apply text-xs font-mono text-foreground whitespace-nowrap;
+    @apply opacity-0 pointer-events-none;
+    @apply transition-opacity duration-150;
+    @apply z-50;
+  }
+
+  .rail-button:hover .tooltip {
+    @apply opacity-100;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-signal-blue via-signal-purple to-signal-cyan;
+  }
+
+  .border-glow-green {
+    box-shadow: 0 0 0 1px hsl(var(--signal-green)), 0 0 20px -5px hsl(var(--signal-green));
+  }
+
+  .border-glow-blue {
+    box-shadow: 0 0 0 1px hsl(var(--signal-blue)), 0 0 20px -5px hsl(var(--signal-blue));
+  }
+
+  /* Grid background pattern */
+  .grid-bg {
+    background-size: 20px 20px;
+    background-image: 
+      linear-gradient(to right, hsl(var(--terminal-border) / 0.3) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--terminal-border) / 0.3) 1px, transparent 1px);
+  }
+
+  /* Fade edges */
+  .fade-edges {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 5%,
+      black 95%,
+      transparent 100%
+    );
+  }
+}
+
+/* Boot sequence animation */
+@keyframes bootSequence {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.boot-sequence > * {
+  animation: bootSequence 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.boot-sequence > *:nth-child(1) { animation-delay: 0.05s; }
+.boot-sequence > *:nth-child(2) { animation-delay: 0.1s; }
+.boot-sequence > *:nth-child(3) { animation-delay: 0.15s; }
+.boot-sequence > *:nth-child(4) { animation-delay: 0.2s; }
+.boot-sequence > *:nth-child(5) { animation-delay: 0.25s; }
+.boot-sequence > *:nth-child(6) { animation-delay: 0.3s; }
+.boot-sequence > *:nth-child(7) { animation-delay: 0.35s; }
+.boot-sequence > *:nth-child(8) { animation-delay: 0.4s; }
+.boot-sequence > *:nth-child(9) { animation-delay: 0.45s; }
+.boot-sequence > *:nth-child(10) { animation-delay: 0.5s; }
