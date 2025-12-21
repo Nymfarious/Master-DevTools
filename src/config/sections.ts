@@ -5,11 +5,8 @@ import {
   ScrollText, 
   GitBranch, 
   Shield, 
-  Database, 
   Palette, 
   Bot, 
-  Volume2, 
-  Film, 
   Package, 
   Settings,
   FileJson,
@@ -17,11 +14,26 @@ import {
   Keyboard,
   Wand2,
   Archive,
+  FlaskConical,
   LucideIcon 
 } from 'lucide-react';
 import type { SectionId, DevToolsSection } from '@/types/devtools';
 
-export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
+// ═══════════════════════════════════════════════════════════════════════════
+// SECTION CATEGORIES FOR v3.0.0
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface SectionCategory {
+  id: string;
+  label: string;
+  sections: DevToolsSection[];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MONITORING SECTIONS (6 panels)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const MONITORING_SECTIONS: DevToolsSection[] = [
   {
     id: 'overview',
     label: 'Overview',
@@ -39,19 +51,11 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
     phase: 1,
   },
   {
-    id: 'apis',
-    label: 'API Registry',
-    icon: Network,
-    description: 'All APIs with health checks',
-    shortcut: '⌘3',
-    phase: 2,
-  },
-  {
     id: 'logs',
     label: 'Event Logs',
     icon: ScrollText,
     description: 'Error console and warnings',
-    shortcut: '⌘4',
+    shortcut: '⌘3',
     phase: 2,
   },
   {
@@ -59,7 +63,7 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
     label: 'Pipeline',
     icon: GitBranch,
     description: 'AI generation tracking',
-    shortcut: '⌘5',
+    shortcut: '⌘4',
     phase: 2,
   },
   {
@@ -67,23 +71,69 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
     label: 'Security',
     icon: Shield,
     description: 'Edge functions and RLS',
-    shortcut: '⌘6',
+    shortcut: '⌘5',
     phase: 3,
   },
   {
-    id: 'data',
-    label: 'Data & Test',
-    icon: Database,
-    description: 'Seed data, cache controls',
+    id: 'apis',
+    label: 'API Registry',
+    icon: Network,
+    description: 'All APIs with health checks',
+    shortcut: '⌘6',
+    phase: 2,
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TESTING SECTIONS (1 consolidated panel)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const TESTING_SECTIONS: DevToolsSection[] = [
+  {
+    id: 'testlab',
+    label: 'Test Lab',
+    icon: FlaskConical,
+    description: 'Audio, Video, Data testing',
     shortcut: '⌘7',
     phase: 3,
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REFERENCE SECTIONS (7 panels including previously unlisted)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const REFERENCE_SECTIONS: DevToolsSection[] = [
+  {
+    id: 'styleguide',
+    label: 'Style Guide',
+    icon: Palette,
+    description: 'Design tokens and patterns',
+    shortcut: '⌘8',
+    phase: 10,
+  },
+  {
+    id: 'shortcuts',
+    label: 'Shortcuts',
+    icon: Keyboard,
+    description: 'Keyboard shortcuts reference',
+    shortcut: '⌘/',
+    phase: 10,
+  },
+  {
+    id: 'libraries',
+    label: 'Libraries',
+    icon: Package,
+    description: 'Dependencies and versions',
+    shortcut: '⌘9',
+    phase: 4,
   },
   {
     id: 'tokens',
     label: 'UI Tokens',
     icon: Palette,
     description: 'Colors and typography',
-    shortcut: '⌘8',
+    shortcut: '⌘0',
     phase: 3,
   },
   {
@@ -99,32 +149,8 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
     label: 'MCP/Agents',
     icon: Bot,
     description: 'AI agent management',
-    shortcut: '⌘9',
+    shortcut: '⌘A',
     phase: 6,
-  },
-  {
-    id: 'audio',
-    label: 'Audio',
-    icon: Volume2,
-    description: 'Sound system controls',
-    shortcut: '⌘0',
-    phase: 5,
-  },
-  {
-    id: 'video',
-    label: 'Animation',
-    icon: Film,
-    description: 'Rive and animation debug',
-    shortcut: '⌘-',
-    phase: 6,
-  },
-  {
-    id: 'libraries',
-    label: 'Libraries',
-    icon: Package,
-    description: 'Dependencies and versions',
-    shortcut: '⌘=',
-    phase: 4,
   },
   {
     id: 'content',
@@ -134,22 +160,13 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
     shortcut: '⌘\\',
     phase: 5,
   },
-  {
-    id: 'shortcuts',
-    label: 'Shortcuts',
-    icon: Keyboard,
-    description: 'Keyboard shortcuts reference',
-    shortcut: '⌘/',
-    phase: 10,
-  },
-  {
-    id: 'styleguide',
-    label: 'Style Guide',
-    icon: Palette,
-    description: 'Design tokens and patterns',
-    shortcut: '⌘;',
-    phase: 10,
-  },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TOOLS SECTIONS (3 panels)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const TOOLS_SECTIONS: DevToolsSection[] = [
   {
     id: 'generator',
     label: 'Generator',
@@ -174,8 +191,35 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
   },
 ];
 
-export const MAIN_SECTIONS = DEVTOOLS_SECTIONS.slice(0, 9);
-export const META_SECTIONS = DEVTOOLS_SECTIONS.slice(9);
+// ═══════════════════════════════════════════════════════════════════════════
+// CATEGORIZED SECTIONS (for Sidebar with headers)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const SECTION_CATEGORIES: SectionCategory[] = [
+  { id: 'monitoring', label: 'Monitoring', sections: MONITORING_SECTIONS },
+  { id: 'testing', label: 'Testing', sections: TESTING_SECTIONS },
+  { id: 'reference', label: 'Reference', sections: REFERENCE_SECTIONS },
+  { id: 'tools', label: 'Tools', sections: TOOLS_SECTIONS },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FLAT LIST (for compatibility)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
+  ...MONITORING_SECTIONS,
+  ...TESTING_SECTIONS,
+  ...REFERENCE_SECTIONS,
+  ...TOOLS_SECTIONS,
+];
+
+// Legacy exports for compatibility
+export const MAIN_SECTIONS = DEVTOOLS_SECTIONS.slice(0, 7);
+export const META_SECTIONS = DEVTOOLS_SECTIONS.slice(7);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
 
 export function getSectionById(id: SectionId): DevToolsSection | undefined {
   return DEVTOOLS_SECTIONS.find(section => section.id === id);

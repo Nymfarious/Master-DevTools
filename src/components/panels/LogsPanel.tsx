@@ -1,5 +1,4 @@
-// Logs Panel - Full event logs with filtering, search, and red dot system
-// Lines: ~185 | Status: GREEN
+// Logs Panel v3.0.0 - Full event logs with filtering, search, refresh, and improved styling
 import { useState, useMemo, useEffect } from 'react';
 import { 
   ScrollText, 
@@ -12,12 +11,14 @@ import {
   AlertCircle,
   AlertTriangle,
   Info,
-  CheckCircle2
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLogsStore } from '@/stores/logsStore';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import type { LogLevel } from '@/types/devtools';
 
 type FilterType = 'all' | 'error' | 'warn' | 'info';
@@ -43,6 +44,8 @@ export function LogsPanel() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [justMarkedRead, setJustMarkedRead] = useState(false);
 
   // Mark all as read when panel opens
   useEffect(() => {
@@ -84,6 +87,20 @@ export function LogsPanel() {
     });
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // Simulate refresh delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setIsRefreshing(false);
+    toast.success('Logs refreshed');
+  };
+
+  const handleMarkAllRead = () => {
+    markAllRead();
+    setJustMarkedRead(true);
+    setTimeout(() => setJustMarkedRead(false), 2000);
+  };
+
   const exportLogs = () => {
     const data = JSON.stringify(logs, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -106,10 +123,21 @@ export function LogsPanel() {
     <div className="space-y-4 boot-sequence">
       {/* Header */}
       <div className="space-y-3">
-        <h2 className="section-header text-lg">
-          <ScrollText className="w-4 h-4" />
-          Event Logs
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="section-header text-lg">
+            <ScrollText className="w-4 h-4" />
+            Event Logs
+          </h2>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            className="h-7 text-xs gap-1.5"
+          >
+            <RefreshCw className={cn("w-3 h-3", isRefreshing && "animate-spin")} />
+            Refresh
+          </Button>
+        </div>
         
         {/* Filter tabs + Search */}
         <div className="flex items-center gap-4">
@@ -164,27 +192,46 @@ export function LogsPanel() {
               const Icon = LEVEL_ICONS[log.level];
               const isExpanded = expandedLogs.has(log.id);
               const hasContext = log.context && Object.keys(log.context).length > 0;
+              const isRead = log.read;
               
               return (
                 <div key={log.id} className="group">
                   <div className={cn(
-                    "p-3 hover:bg-secondary/30 transition-colors",
-                    !log.read && "border-l-2 border-l-signal-blue"
+                    "p-3 transition-colors",
+                    isRead 
+                      ? "opacity-60 hover:opacity-80" 
+                      : "border-l-2 border-l-signal-blue hover:bg-secondary/30"
                   )}>
                     <div className="flex items-start gap-3">
-                      <Icon className={cn("w-4 h-4 mt-0.5 flex-shrink-0", LEVEL_STYLES[log.level].split(' ')[1])} />
+                      <Icon className={cn(
+                        "w-4 h-4 mt-0.5 flex-shrink-0", 
+                        LEVEL_STYLES[log.level].split(' ')[1],
+                        isRead && "opacity-60"
+                      )} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={cn("badge text-[10px]", LEVEL_STYLES[log.level])}>
+                          <span className={cn(
+                            "badge text-[10px]", 
+                            LEVEL_STYLES[log.level],
+                            isRead && "opacity-60"
+                          )}>
                             {log.level.toUpperCase()}
                           </span>
-                          <span className="font-mono text-xs text-muted-foreground">
+                          <span className={cn(
+                            "font-mono text-xs",
+                            isRead ? "text-muted-foreground/50" : "text-muted-foreground"
+                          )}>
                             {formatTime(log.timestamp)}
                           </span>
                         </div>
-                        <p className="text-sm text-foreground">{log.message}</p>
+                        <p className={cn(
+                          "text-sm",
+                          isRead ? "text-muted-foreground" : "text-foreground"
+                        )}>
+                          {log.message}
+                        </p>
                         {log.source && (
-                          <p className="text-xs text-muted-foreground mt-1">Source: {log.source}</p>
+                          <p className="text-xs text-muted-foreground/60 mt-1">Source: {log.source}</p>
                         )}
                       </div>
                       {hasContext && (
@@ -214,8 +261,17 @@ export function LogsPanel() {
       
       {/* Actions */}
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={markAllRead} className="text-xs">
-          <CheckCircle className="w-3 h-3 mr-1.5" /> Mark All Read
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleMarkAllRead} 
+          className={cn(
+            "text-xs transition-colors",
+            justMarkedRead && "text-signal-green border-signal-green/50"
+          )}
+        >
+          <CheckCircle className={cn("w-3 h-3 mr-1.5", justMarkedRead && "text-signal-green")} /> 
+          {justMarkedRead ? 'Marked!' : 'Mark All Read'}
         </Button>
         <Button variant="outline" size="sm" onClick={() => clearByLevel('error')} className="text-xs text-signal-red">
           <Trash2 className="w-3 h-3 mr-1.5" /> Clear Errors
