@@ -27,6 +27,10 @@ export interface DevToolsSettings {
   
   // Security
   blockSignups: boolean;
+  authBypass: boolean; // Auth Bypass - skip auth checks for testing
+  
+  // Connections
+  suspendConnections: boolean; // Suspend all API/health check connections
   
   // Role
   currentRole: UserRole;
@@ -53,6 +57,8 @@ const defaultSettings: DevToolsSettings = {
   guestUploadOverride: false,
   guestModeEnabled: false, // Guest mode OFF by default
   blockSignups: false,
+  authBypass: false, // Auth bypass OFF by default
+  suspendConnections: false, // Connections active by default
   currentRole: 'developer',
   expandIconStyle: 'chevron',
   lowResourceMode: true, // Default ON to save resources
