@@ -39,7 +39,7 @@ export function Header() {
               DEVTOOLS
             </span>
           </div>
-          <span className="text-[10px] font-mono text-muted-foreground/60">v3.0.0</span>
+          <span className="text-[10px] font-mono text-muted-foreground/60">v3.1.0</span>
         </div>
 
         {/* Center: Search */}
