@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { LogLevel, DevLogEntry } from '../types';
+import { useSettingsStore } from './settingsStore';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LOGS STATE
@@ -96,6 +97,10 @@ export const initializeErrorInterception = () => {
   const originalWarn = console.warn;
 
   const safeLog = (level: LogLevel, args: unknown[], source: string) => {
+    // Check if error interception is enabled before logging
+    const isEnabled = useSettingsStore.getState().settings.errorInterceptionEnabled;
+    if (!isEnabled) return;
+
     const message = args
       .map((a) => {
         if (typeof a === 'string') return a;
@@ -128,6 +133,9 @@ export const initializeErrorInterception = () => {
   };
 
   window.addEventListener('error', (event) => {
+    const isEnabled = useSettingsStore.getState().settings.errorInterceptionEnabled;
+    if (!isEnabled) return;
+    
     queueMicrotask(() => {
       logEvent(
         'error',
@@ -143,6 +151,9 @@ export const initializeErrorInterception = () => {
   });
 
   window.addEventListener('unhandledrejection', (event) => {
+    const isEnabled = useSettingsStore.getState().settings.errorInterceptionEnabled;
+    if (!isEnabled) return;
+    
     queueMicrotask(() => {
       logEvent('error', `Unhandled Promise Rejection: ${event.reason}`, undefined, 'promise');
     });

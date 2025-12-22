@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SectionId, DevLogEntry, LogLevel, PipelineEvent, MiniDevConfig } from '../types/devtools';
+import { useSettingsStore } from '@/devtools/stores/settingsStore';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MAIN DEVTOOLS STORE
@@ -227,6 +228,10 @@ export const initializeErrorInterception = () => {
 
   // Avoid state updates during render and avoid hard failures if logging throws
   const safeLog = (level: LogLevel, args: unknown[], source: string) => {
+    // Check if error interception is enabled before logging
+    const isEnabled = useSettingsStore.getState().settings.errorInterceptionEnabled;
+    if (!isEnabled) return;
+
     const message = args
       .map((a) => {
         if (typeof a === 'string') return a;
@@ -258,6 +263,9 @@ export const initializeErrorInterception = () => {
   };
 
   window.addEventListener('error', (event) => {
+    const isEnabled = useSettingsStore.getState().settings.errorInterceptionEnabled;
+    if (!isEnabled) return;
+
     queueMicrotask(() => {
       logDevEvent(
         'error',
@@ -273,6 +281,9 @@ export const initializeErrorInterception = () => {
   });
 
   window.addEventListener('unhandledrejection', (event) => {
+    const isEnabled = useSettingsStore.getState().settings.errorInterceptionEnabled;
+    if (!isEnabled) return;
+
     queueMicrotask(() => {
       logDevEvent('error', `Unhandled Promise Rejection: ${event.reason}`, undefined, 'promise');
     });

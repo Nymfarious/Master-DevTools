@@ -43,6 +43,9 @@ export interface DevToolsSettings {
   
   // Monitoring
   fpsMonitoringEnabled: boolean;
+  
+  // Error Interception - toggle console.error/warn capture
+  errorInterceptionEnabled: boolean;
 }
 
 const defaultSettings: DevToolsSettings = {
@@ -63,6 +66,7 @@ const defaultSettings: DevToolsSettings = {
   expandIconStyle: 'chevron',
   lowResourceMode: true, // Default ON to save resources
   fpsMonitoringEnabled: false, // Default OFF to save resources
+  errorInterceptionEnabled: true, // Error interception ON by default
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
