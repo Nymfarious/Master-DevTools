@@ -20,7 +20,8 @@ export function AppShell({ children }: AppShellProps) {
   useEffect(() => {
     const timer = setInterval(incrementUptime, 1000);
     return () => clearInterval(timer);
-  }, [incrementUptime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // incrementUptime is stable from Zustand
 
   // Keyboard shortcuts (⌘/Ctrl for Mac, Alt for Windows/Linux)
   useEffect(() => {
@@ -76,7 +77,8 @@ export function AppShell({ children }: AppShellProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setActiveSection, setCommandPaletteOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Zustand actions are stable
 
   return (
     <div className="min-h-screen bg-background grid-bg relative">
