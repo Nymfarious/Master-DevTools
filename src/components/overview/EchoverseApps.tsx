@@ -52,12 +52,12 @@ const APPS: EchoverseApp[] = [
     githubUrl: 'https://github.com/echoverse/cdmedia'
   },
   { 
-    id: 'video-extractor', 
-    name: 'Video Extractor', 
-    description: 'Extract frames and clips',
+    id: 'frameperfect-ai', 
+    name: 'FramePerfect AI', 
+    description: 'Extract, analyze & curate video frames with Gemini AI',
     icon: Video, 
     status: 'coming-soon',
-    githubUrl: 'https://github.com/echoverse/video-extractor'
+    githubUrl: 'https://github.com/Nymfarious/FramePerfect-AI'
   },
   { 
     id: 'juniper', 
