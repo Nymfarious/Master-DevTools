@@ -1,5 +1,6 @@
-// Settings Panel v3.1.0 - DevTools configuration with error interception toggle
-import { Settings, RefreshCw, Eye, Activity, Beaker, Bot, Code, Upload, ChevronDown, Plus, MoreHorizontal, Zap, Palette, Keyboard, Info, ShieldOff, Unplug, Bug } from 'lucide-react';
+// Settings Panel v3.2.0 - DevTools configuration with error interception toggle and state reset
+import { Settings, RefreshCw, Eye, Activity, Beaker, Bot, Code, Upload, ChevronDown, Plus, MoreHorizontal, Zap, Palette, Keyboard, Info, ShieldOff, Unplug, Bug, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -309,14 +310,40 @@ export function SettingsPanel() {
             </div>
           </CollapsibleSection>
 
-          {/* Reset Button */}
-          <Button 
-            variant="outline" 
-            className="w-full border-signal-red/50 text-signal-red hover:bg-signal-red/10"
-            onClick={resetSettings}
-          >
-            Reset All Settings
-          </Button>
+          {/* Reset Buttons */}
+          <div className="space-y-2">
+            <Button 
+              variant="outline" 
+              className="w-full border-signal-red/50 text-signal-red hover:bg-signal-red/10"
+              onClick={resetSettings}
+            >
+              <RefreshCw className="w-3 h-3 mr-2" />
+              Reset All Settings
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full border-destructive/50 text-destructive hover:bg-destructive/10"
+              onClick={() => {
+                // All persisted devtools store keys
+                const devtoolsKeys = [
+                  'devtools-settings',
+                  'devtools-state',
+                  'devtools-app-state',
+                  'master-devtools-errors',
+                  'master-devtools-build-status',
+                ];
+                devtoolsKeys.forEach(key => localStorage.removeItem(key));
+                toast.success('DevTools state cleared', {
+                  description: 'Reloading page to apply changes...',
+                });
+                setTimeout(() => window.location.reload(), 500);
+              }}
+            >
+              <Trash2 className="w-3 h-3 mr-2" />
+              Clear Persisted DevTools State
+            </Button>
+          </div>
 
         </div>
       </ScrollArea>
