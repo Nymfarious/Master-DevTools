@@ -1,6 +1,6 @@
 import { Terminal } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
-import { useLogsStore } from '@/stores/logsStore';
+import { useErrorStore } from '@/stores/errorStore';
 import { 
   MONITORING_SECTIONS, 
   TESTING_SECTIONS, 
@@ -18,7 +18,7 @@ import type { SectionId, DevToolsSection } from '@/types/devtools';
 
 export function Sidebar() {
   const { activeSection, setActiveSection } = useAppStore();
-  const { hasUnreadErrors } = useLogsStore();
+  const hasUnreadErrors = useErrorStore(state => state.hasUnreadErrors);
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-16 z-50 border-r border-border bg-card flex flex-col">
@@ -88,7 +88,7 @@ export function Sidebar() {
 
       {/* Version */}
       <div className="p-2 text-center">
-        <span className="text-[10px] font-mono text-muted-foreground">v3.1.0</span>
+        <span className="text-[10px] font-mono text-muted-foreground">v3.2.0</span>
       </div>
     </aside>
   );
