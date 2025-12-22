@@ -1,9 +1,9 @@
-// Pipeline Panel - Tracks AI generation events with manual sync
-// Lines: ~220 | Status: GREEN
-import { useState } from 'react';
+// Pipeline Panel - Enhanced v3.2.0 with Job Cards and Timeline
+import { useState, useMemo } from 'react';
 import { 
-  GitBranch, RefreshCw, CheckCircle2, XCircle, Clock, Zap,
-  Filter, Trash2, Play, Database, CloudOff
+  GitBranch, RefreshCw, Sparkles, Filter, Trash2, 
+  Upload, Settings, Scissors, Package, Download,
+  Film, Eye, Layers, Bot, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,248 +14,268 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { usePipelineStore, generateDemoPipelineEvent, type PipelineEvent } from '@/stores/pipelineStore';
-import { usePipelineSync } from '@/hooks/usePipelineSync';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { 
+  PipelineJobCard, 
+  PipelineJob, 
+  PipelineStage,
+  AIAgentStatus, 
+  DEFAULT_AI_AGENTS 
+} from '@/components/pipeline';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 
-const PROVIDER_COLORS: Record<string, string> = {
-  'OpenAI': 'bg-signal-green/20 text-signal-green border-signal-green/30',
-  'ElevenLabs': 'bg-signal-blue/20 text-signal-blue border-signal-blue/30',
-  'Anthropic': 'bg-signal-purple/20 text-signal-purple border-signal-purple/30',
-  'Stability AI': 'bg-signal-amber/20 text-signal-amber border-signal-amber/30',
+// Stage configurations by app type
+const PIPELINE_STAGES: Record<string, Omit<PipelineStage, 'status' | 'progress'>[]> = {
+  'sprite-slicer': [
+    { id: 'upload', label: 'Upload', icon: Upload, description: 'Upload sprite sheet' },
+    { id: 'configure', label: 'Configure', icon: Settings, description: 'Set grid parameters' },
+    { id: 'slice', label: 'Slice', icon: Scissors, description: 'Extract individual sprites' },
+    { id: 'library', label: 'Library', icon: Package, description: 'Add to sprite library' },
+    { id: 'export', label: 'Export', icon: Download, description: 'Export sprite pack' },
+  ],
+  'perfectframe': [
+    { id: 'extraction', label: 'Extract', icon: Film, description: 'Extract video frames' },
+    { id: 'analysis', label: 'Analyze', icon: Eye, description: 'AI frame analysis' },
+    { id: 'clustering', label: 'Cluster', icon: Layers, description: 'Group similar frames' },
+  ],
+  'miku-studio': [
+    { id: 'decomposition', label: 'Decompose', icon: Layers, description: 'Character decomposition' },
+    { id: 'expression', label: 'Expression', icon: Sparkles, description: 'Generate expressions' },
+    { id: 'export', label: 'Export', icon: Package, description: 'Prepare export files' },
+  ],
 };
 
-function EventRow({ event }: { event: PipelineEvent }) {
-  const [expanded, setExpanded] = useState(false);
-  
-  return (
-    <div 
-      className={cn(
-        "terminal-glass rounded-lg overflow-hidden transition-all",
-        expanded && "ring-1 ring-signal-blue/30"
-      )}
-    >
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full p-3 flex items-center gap-3 text-left hover:bg-elevated/50"
-      >
-        {event.success ? (
-          <CheckCircle2 className="w-4 h-4 text-signal-green flex-shrink-0" />
-        ) : (
-          <XCircle className="w-4 h-4 text-signal-red flex-shrink-0" />
-        )}
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-mono text-sm text-foreground">
-              {event.step}
-            </span>
-            <Badge 
-              variant="outline" 
-              className={cn("text-[10px] px-1.5 py-0", PROVIDER_COLORS[event.provider])}
-            >
-              {event.provider}
-            </Badge>
-          </div>
-          {event.asset_id && (
-            <p className="text-xs font-mono text-muted-foreground truncate">
-              {event.asset_id}
-            </p>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-3 text-right">
-          <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3 text-muted-foreground" />
-            <span className={cn(
-              "text-xs font-mono",
-              event.duration_ms < 500 && "text-signal-green",
-              event.duration_ms >= 500 && event.duration_ms < 1500 && "text-signal-amber",
-              event.duration_ms >= 1500 && "text-signal-red"
-            )}>
-              {event.duration_ms}ms
-            </span>
-          </div>
-          <span className="text-[10px] text-muted-foreground w-16">
-            {formatDistanceToNow(event.created_at, { addSuffix: true })}
-          </span>
-        </div>
-      </button>
-      
-      {expanded && (
-        <div className="px-3 pb-3 border-t border-border/50">
-          <div className="mt-2 space-y-2">
-            {event.error && (
-              <div className="p-2 bg-signal-red/10 border border-signal-red/20 rounded text-xs text-signal-red font-mono">
-                {event.error}
-              </div>
-            )}
-            {event.metadata && (
-              <div className="p-2 bg-surface rounded text-xs font-mono text-muted-foreground">
-                <pre>{JSON.stringify(event.metadata, null, 2)}</pre>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+// Generate mock jobs for demonstration
+function generateMockJobs(): PipelineJob[] {
+  const now = new Date();
+  const fiveMinAgo = new Date(now.getTime() - 5 * 60 * 1000);
+  const tenMinAgo = new Date(now.getTime() - 10 * 60 * 1000);
+  const twentyMinAgo = new Date(now.getTime() - 20 * 60 * 1000);
+
+  return [
+    {
+      id: 'job-001',
+      name: 'character_sprites_v2.png',
+      source: 'Sprite Slicer',
+      sourceIcon: Scissors,
+      stages: PIPELINE_STAGES['sprite-slicer'].map((s, i) => ({
+        ...s,
+        status: i < 2 ? 'complete' : i === 2 ? 'active' : 'pending',
+        progress: i === 2 ? 65 : undefined,
+      })) as PipelineStage[],
+      currentStageIndex: 2,
+      overallProgress: 65,
+      status: 'processing',
+      startedAt: fiveMinAgo,
+      completedAt: null,
+    },
+    {
+      id: 'job-002',
+      name: 'gameplay_recording.mp4',
+      source: 'PerfectFrame',
+      sourceIcon: Film,
+      stages: PIPELINE_STAGES['perfectframe'].map((s) => ({
+        ...s,
+        status: 'complete',
+      })) as PipelineStage[],
+      currentStageIndex: 2,
+      overallProgress: 100,
+      status: 'completed',
+      startedAt: twentyMinAgo,
+      completedAt: tenMinAgo,
+    },
+    {
+      id: 'job-003',
+      name: 'miku_model_expressions.psd',
+      source: 'Miku Studio',
+      sourceIcon: Sparkles,
+      stages: PIPELINE_STAGES['miku-studio'].map((s, i) => ({
+        ...s,
+        status: i === 0 ? 'complete' : i === 1 ? 'failed' : 'pending',
+      })) as PipelineStage[],
+      currentStageIndex: 1,
+      overallProgress: 35,
+      status: 'failed',
+      startedAt: tenMinAgo,
+      completedAt: null,
+      errorMessage: 'Expression generation failed: Model timeout after 30s. Rate limit may have been exceeded.',
+    },
+  ];
 }
 
-export function PipelinePanel() {
-  const { events, filter, setFilter, addEvent, clearEvents, isLoading } = usePipelineStore();
-  const { fetchEvents, isSyncing } = usePipelineSync();
-  const [demoMode, setDemoMode] = useState(false);
+type StatusFilter = 'all' | 'processing' | 'completed' | 'failed';
+type SourceFilter = 'all' | 'sprite-slicer' | 'perfectframe' | 'miku-studio';
 
-  // Filter events
-  const filteredEvents = events.filter(event => {
-    if (filter.provider && event.provider !== filter.provider) return false;
-    if (filter.success !== null && event.success !== filter.success) return false;
-    return true;
-  });
+export function PipelinePanel() {
+  const [jobs, setJobs] = useState<PipelineJob[]>(generateMockJobs);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showAgents, setShowAgents] = useState(true);
+
+  // Filter jobs
+  const filteredJobs = useMemo(() => {
+    return jobs.filter(job => {
+      if (statusFilter !== 'all' && job.status !== statusFilter) return false;
+      if (sourceFilter !== 'all') {
+        const sourceMap: Record<SourceFilter, string> = {
+          'all': '',
+          'sprite-slicer': 'Sprite Slicer',
+          'perfectframe': 'PerfectFrame',
+          'miku-studio': 'Miku Studio',
+        };
+        if (job.source !== sourceMap[sourceFilter]) return false;
+      }
+      return true;
+    });
+  }, [jobs, statusFilter, sourceFilter]);
+
+  // Sort: active first, then by timestamp
+  const sortedJobs = useMemo(() => {
+    return [...filteredJobs].sort((a, b) => {
+      if (a.status === 'processing' && b.status !== 'processing') return -1;
+      if (b.status === 'processing' && a.status !== 'processing') return 1;
+      const aTime = a.startedAt?.getTime() || 0;
+      const bTime = b.startedAt?.getTime() || 0;
+      return bTime - aTime;
+    });
+  }, [filteredJobs]);
 
   // Stats
-  const successCount = events.filter(e => e.success).length;
-  const failureCount = events.filter(e => !e.success).length;
-  const avgDuration = events.length > 0
-    ? Math.round(events.reduce((sum, e) => sum + e.duration_ms, 0) / events.length)
-    : 0;
+  const activeCount = jobs.filter(j => j.status === 'processing').length;
+  const completedCount = jobs.filter(j => j.status === 'completed').length;
+  const failedCount = jobs.filter(j => j.status === 'failed').length;
 
-  // Demo mode - LOCAL ONLY, no DB writes
-  const generateDemoEvent = () => {
-    const event = generateDemoPipelineEvent();
-    addEvent(event); // Local only, no persistEvent call
+  // Actions
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await new Promise(r => setTimeout(r, 1000)); // Simulate refresh
+    setLastUpdated(new Date());
+    setIsRefreshing(false);
+  };
+
+  const handleClearCompleted = () => {
+    setJobs(jobs.filter(j => j.status !== 'completed'));
+  };
+
+  const handleRetry = (jobId: string) => {
+    setJobs(jobs.map(j => 
+      j.id === jobId 
+        ? { ...j, status: 'processing' as const, errorMessage: undefined }
+        : j
+    ));
   };
 
   return (
-    <div className="space-y-4">
-      {/* Sync Bar - prominent at top */}
-      <div className="terminal-glass p-3 rounded-lg flex items-center justify-between bg-signal-blue/5 border border-signal-blue/20">
-        <div className="flex items-center gap-2">
-          <Database className="w-4 h-4 text-signal-blue" />
-          <span className="text-sm font-medium text-foreground">Database Sync</span>
-          <Badge variant="outline" className="text-[10px] gap-1">
-            <CloudOff className="w-2.5 h-2.5" />
-            Manual
-          </Badge>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={fetchEvents}
-          disabled={isSyncing}
-          className="h-7 gap-1.5 border-signal-blue/30 hover:bg-signal-blue/10"
-        >
-          <RefreshCw className={cn("w-3 h-3", isSyncing && "animate-spin")} />
-          {isSyncing ? 'Syncing...' : 'Sync from DB'}
-        </Button>
-      </div>
-
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-display font-semibold text-foreground flex items-center gap-2">
-            <GitBranch className="w-5 h-5 text-signal-purple" />
-            Pipeline Events
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Track AI generation events across all providers
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={generateDemoEvent}
-            className="h-8 gap-1.5"
-            title="Add a demo event (local only, no DB write)"
-          >
-            <Play className="w-3 h-3" />
-            Add Demo
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearEvents}
-            className="h-8 gap-1.5"
-          >
-            <Trash2 className="w-3 h-3" />
-            Clear
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Bar */}
-      <div className="grid grid-cols-4 gap-3">
-        <div className="terminal-glass p-3 rounded-lg">
-          <p className="text-xs text-muted-foreground">Total Events</p>
-          <p className="text-xl font-mono font-bold text-foreground">{events.length}</p>
-        </div>
-        <div className="terminal-glass p-3 rounded-lg">
-          <p className="text-xs text-muted-foreground">Success Rate</p>
-          <p className="text-xl font-mono font-bold text-signal-green">
-            {events.length > 0 ? Math.round((successCount / events.length) * 100) : 0}%
-          </p>
-        </div>
-        <div className="terminal-glass p-3 rounded-lg">
-          <p className="text-xs text-muted-foreground">Failures</p>
-          <p className="text-xl font-mono font-bold text-signal-red">{failureCount}</p>
-        </div>
-        <div className="terminal-glass p-3 rounded-lg">
-          <p className="text-xs text-muted-foreground">Avg Duration</p>
-          <p className="text-xl font-mono font-bold text-signal-cyan">{avgDuration}ms</p>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="flex items-center gap-3">
-        <Filter className="w-4 h-4 text-muted-foreground" />
-        <Select 
-          value={filter.provider || 'all'} 
-          onValueChange={(v) => setFilter({ provider: v === 'all' ? null : v })}
-        >
-          <SelectTrigger className="w-40 h-8">
-            <SelectValue placeholder="Provider" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Providers</SelectItem>
-            <SelectItem value="OpenAI">OpenAI</SelectItem>
-            <SelectItem value="ElevenLabs">ElevenLabs</SelectItem>
-            <SelectItem value="Anthropic">Anthropic</SelectItem>
-            <SelectItem value="Stability AI">Stability AI</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select 
-          value={filter.success === null ? 'all' : filter.success.toString()} 
-          onValueChange={(v) => setFilter({ success: v === 'all' ? null : v === 'true' })}
-        >
-          <SelectTrigger className="w-32 h-8">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="true">Success</SelectItem>
-            <SelectItem value="false">Failed</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Events List */}
-      <div className="space-y-2 max-h-[calc(100vh-400px)] overflow-y-auto">
-        {filteredEvents.length === 0 ? (
-          <div className="terminal-glass p-8 rounded-lg text-center">
-            <Zap className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">
-              No pipeline events yet. Click "Demo Mode" to generate sample events.
+      <div className="p-4 border-b border-border space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-display font-semibold flex items-center gap-2">
+              <GitBranch className="w-5 h-5 text-primary" />
+              Pipeline Monitor
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Last updated: {formatDistanceToNow(lastUpdated, { addSuffix: true })}
             </p>
           </div>
-        ) : (
-          filteredEvents.map(event => (
-            <EventRow key={event.id} event={event} />
-          ))
-        )}
+          <div className="flex items-center gap-2">
+            {activeCount > 0 && (
+              <Badge className="bg-primary/20 text-primary">
+                {activeCount} Active
+              </Badge>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="h-8 gap-1.5"
+            >
+              <RefreshCw className={cn("w-3 h-3", isRefreshing && "animate-spin")} />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearCompleted}
+              disabled={completedCount === 0}
+              className="h-8 gap-1.5"
+            >
+              <Trash2 className="w-3 h-3" />
+              Clear Completed
+            </Button>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-3">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)} className="flex-1">
+            <TabsList className="h-8">
+              <TabsTrigger value="all" className="text-xs px-3 h-6">All ({jobs.length})</TabsTrigger>
+              <TabsTrigger value="processing" className="text-xs px-3 h-6">Active ({activeCount})</TabsTrigger>
+              <TabsTrigger value="completed" className="text-xs px-3 h-6">Completed ({completedCount})</TabsTrigger>
+              <TabsTrigger value="failed" className="text-xs px-3 h-6">Failed ({failedCount})</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Select value={sourceFilter} onValueChange={(v) => setSourceFilter(v as SourceFilter)}>
+            <SelectTrigger className="w-40 h-8">
+              <SelectValue placeholder="Source" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Apps</SelectItem>
+              <SelectItem value="sprite-slicer">Sprite Slicer</SelectItem>
+              <SelectItem value="perfectframe">PerfectFrame</SelectItem>
+              <SelectItem value="miku-studio">Miku Studio</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
+
+      {/* AI Agents Section (Collapsible) */}
+      <Collapsible open={showAgents} onOpenChange={setShowAgents} className="border-b border-border">
+        <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-2 hover:bg-muted/50 transition-colors">
+          <div className="flex items-center gap-2">
+            <Bot className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium">AI Agents</span>
+          </div>
+          <ChevronDown className={cn("w-4 h-4 transition-transform", showAgents && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="p-4 bg-muted/30">
+            <AIAgentStatus agents={DEFAULT_AI_AGENTS} />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Jobs List */}
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-3">
+          {sortedJobs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Sparkles className="w-10 h-10 text-muted-foreground mb-3" />
+              <h3 className="text-sm font-medium">No Active Pipelines</h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Pipeline jobs from connected apps will appear here
+              </p>
+            </div>
+          ) : (
+            sortedJobs.map(job => (
+              <PipelineJobCard
+                key={job.id}
+                job={job}
+                onRetry={handleRetry}
+              />
+            ))
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }
