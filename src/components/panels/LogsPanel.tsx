@@ -1,4 +1,4 @@
-// Logs Panel v3.0.0 - Full event logs with filtering, search, refresh, and improved styling
+// Error Log Panel v3.2.0 - Enhanced error logging with typed errors, pin, AI analyze, export
 import { useState, useMemo, useEffect } from 'react';
 import { 
   ScrollText, 
@@ -8,66 +8,106 @@ import {
   Download,
   ChevronDown,
   ChevronUp,
-  AlertCircle,
+  Pin,
+  Sparkles,
+  X,
+  FileX,
+  Wifi,
+  Cog,
+  Server,
+  Shield,
   AlertTriangle,
-  Info,
-  CheckCircle2,
-  RefreshCw
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useLogsStore } from '@/stores/logsStore';
+import { useErrorStore, selectSortedErrors } from '@/stores/errorStore';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type { LogLevel } from '@/types/devtools';
+import { 
+  ErrorType, 
+  ERROR_COLORS, 
+  ERROR_BG_COLORS, 
+  ERROR_BORDER_COLORS 
+} from '@/types/error';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
-type FilterType = 'all' | 'error' | 'warn' | 'info';
+type FilterType = 'all' | ErrorType;
 
-const LEVEL_STYLES: Record<LogLevel, string> = {
-  info: 'bg-signal-blue/20 text-signal-blue',
-  warn: 'bg-signal-amber/20 text-signal-amber',
-  error: 'bg-signal-red/20 text-signal-red',
-  success: 'bg-signal-green/20 text-signal-green',
-  debug: 'bg-signal-purple/20 text-signal-purple',
+const ERROR_ICON_COMPONENTS: Record<ErrorType, typeof FileX> = {
+  import: FileX,
+  export: Download,
+  processing: Cog,
+  network: Wifi,
+  validation: AlertTriangle,
+  api: Server,
+  auth: Shield,
 };
 
-const LEVEL_ICONS: Record<LogLevel, typeof AlertCircle> = {
-  error: AlertCircle,
-  warn: AlertTriangle,
-  info: Info,
-  success: CheckCircle2,
-  debug: Info,
-};
+const filterTabs: { key: FilterType; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'import', label: 'Import' },
+  { key: 'export', label: 'Export' },
+  { key: 'network', label: 'Network' },
+  { key: 'api', label: 'API' },
+  { key: 'processing', label: 'Processing' },
+  { key: 'validation', label: 'Validation' },
+  { key: 'auth', label: 'Auth' },
+];
 
 export function LogsPanel() {
-  const { logs, markAllRead, clearLogs, clearByLevel } = useLogsStore();
+  const errors = useErrorStore(selectSortedErrors);
+  const { 
+    togglePin, 
+    deleteError, 
+    markAsRead, 
+    markAllAsRead, 
+    clearErrors, 
+    clearReadErrors,
+    setAISuggestion,
+    setAnalyzing,
+    hasUnreadErrors
+  } = useErrorStore();
+  
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [justMarkedRead, setJustMarkedRead] = useState(false);
 
   // Mark all as read when panel opens
   useEffect(() => {
-    markAllRead();
-  }, [markAllRead]);
+    markAllAsRead();
+  }, [markAllAsRead]);
 
-  const filteredLogs = useMemo(() => {
-    return logs.filter(log => {
-      const matchesFilter = filter === 'all' || log.level === filter;
+  const filteredErrors = useMemo(() => {
+    return errors.filter(error => {
+      const matchesFilter = filter === 'all' || error.type === filter;
       const matchesSearch = searchQuery === '' || 
-        log.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        log.source?.toLowerCase().includes(searchQuery.toLowerCase());
+        error.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        error.source?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        error.details?.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     });
-  }, [logs, filter, searchQuery]);
+  }, [errors, filter, searchQuery]);
 
-  const counts = useMemo(() => ({
-    total: logs.length,
-    error: logs.filter(l => l.level === 'error').length,
-    warn: logs.filter(l => l.level === 'warn').length,
-    info: logs.filter(l => l.level === 'info' || l.level === 'success' || l.level === 'debug').length,
-  }), [logs]);
+  const counts = useMemo(() => {
+    const result: Record<string, number> = { total: errors.length };
+    filterTabs.forEach(tab => {
+      if (tab.key !== 'all') {
+        result[tab.key] = errors.filter(e => e.type === tab.key).length;
+      }
+    });
+    return result;
+  }, [errors]);
 
   const toggleExpanded = (id: string) => {
     setExpandedLogs(prev => {
@@ -78,8 +118,8 @@ export function LogsPanel() {
     });
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
+  const formatTime = (timestamp: number) => {
+    return new Date(timestamp).toLocaleTimeString('en-US', { 
       hour12: false, 
       hour: '2-digit', 
       minute: '2-digit', 
@@ -87,37 +127,60 @@ export function LogsPanel() {
     });
   };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    // Simulate refresh delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsRefreshing(false);
-    toast.success('Logs refreshed');
+  const handleAnalyzeWithAI = async (id: string, message: string, details?: string) => {
+    setAnalyzing(id, true);
+    // Mock AI analysis - simulates processing time
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Generate mock suggestion based on error type
+    const suggestions = [
+      "Check if the file path is correct and the file exists.",
+      "Verify network connectivity and API endpoint availability.",
+      "Ensure all required fields are properly validated before submission.",
+      "Check authentication tokens and refresh if expired.",
+      "Review the processing pipeline for any missing dependencies.",
+    ];
+    const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+    setAISuggestion(id, suggestion);
+    toast.success('AI analysis complete');
   };
 
-  const handleMarkAllRead = () => {
-    markAllRead();
-    setJustMarkedRead(true);
-    setTimeout(() => setJustMarkedRead(false), 2000);
-  };
+  const exportAsMarkdown = () => {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10);
+    const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-');
+    const filename = `error-log_${dateStr}_${timeStr}.md`;
 
-  const exportLogs = () => {
-    const data = JSON.stringify(logs, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
+    const content = [
+      '# Error Log Export',
+      `Generated: ${now.toLocaleString()}`,
+      `Total Errors: ${errors.length}`,
+      '',
+      '---',
+      '',
+      ...errors.map(err => [
+        `## [${err.type.toUpperCase()}] ${err.message}`,
+        '',
+        `- **Time:** ${new Date(err.timestamp).toLocaleString()}`,
+        `- **Source:** ${err.source || 'Unknown'}`,
+        `- **Pinned:** ${err.pinned ? 'Yes' : 'No'}`,
+        err.details ? `- **Details:** ${err.details}` : '',
+        err.aiSuggestion ? `- **AI Suggestion:** ${err.aiSuggestion}` : '',
+        '',
+        '---',
+        '',
+      ].filter(Boolean).join('\n'))
+    ].join('\n');
+
+    const blob = new Blob([content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `devtools-logs-${Date.now()}.json`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success(`Exported to ${filename}`);
   };
-
-  const filterTabs: { key: FilterType; label: string; color: string }[] = [
-    { key: 'all', label: 'All', color: 'text-foreground' },
-    { key: 'error', label: 'Errors', color: 'text-signal-red' },
-    { key: 'warn', label: 'Warnings', color: 'text-signal-amber' },
-    { key: 'info', label: 'Info', color: 'text-signal-blue' },
-  ];
 
   return (
     <div className="space-y-4 boot-sequence">
@@ -126,28 +189,73 @@ export function LogsPanel() {
         <div className="flex items-center justify-between">
           <h2 className="section-header text-lg">
             <ScrollText className="w-4 h-4" />
-            Event Logs
+            Error Log
+            {counts.total > 0 && (
+              <span className="ml-2 px-2 py-0.5 text-xs font-mono bg-signal-red/20 text-signal-red rounded-full">
+                {counts.total}
+              </span>
+            )}
           </h2>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefresh}
-            className="h-7 text-xs gap-1.5"
-          >
-            <RefreshCw className={cn("w-3 h-3", isRefreshing && "animate-spin")} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportAsMarkdown}
+              className="h-7 text-xs gap-1.5"
+              disabled={errors.length === 0}
+            >
+              <Download className="w-3 h-3" />
+              Export MD
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearReadErrors}
+              className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-signal-amber"
+              disabled={errors.length === 0}
+            >
+              <Trash2 className="w-3 h-3" />
+              Clear Read
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-signal-red"
+                  disabled={errors.length === 0}
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Clear All
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear all errors?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all {errors.length} error logs including pinned items. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={clearErrors} className="bg-signal-red hover:bg-signal-red/90">
+                    Clear All
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
         
         {/* Filter tabs + Search */}
         <div className="flex items-center gap-4">
-          <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg">
+          <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg overflow-x-auto">
             {filterTabs.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setFilter(tab.key)}
                 className={cn(
-                  "px-3 py-1.5 text-xs font-medium rounded-md transition-colors",
+                  "px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap",
                   filter === tab.key 
                     ? "bg-background text-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground"
@@ -155,7 +263,7 @@ export function LogsPanel() {
               >
                 {tab.label}
                 {tab.key !== 'all' && counts[tab.key] > 0 && (
-                  <span className={cn("ml-1.5 font-mono", tab.color)}>
+                  <span className={cn("ml-1 font-mono", ERROR_COLORS[tab.key as ErrorType])}>
                     {counts[tab.key]}
                   </span>
                 )}
@@ -166,90 +274,144 @@ export function LogsPanel() {
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input
-              placeholder="Search logs..."
+              placeholder="Search errors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 h-8 text-sm bg-secondary/50"
             />
           </div>
         </div>
-        
-        {/* Stats */}
-        <p className="text-xs text-muted-foreground">
-          {counts.total} total • {counts.error} errors • {counts.warn} warnings • {counts.info} info
-        </p>
       </div>
       
-      {/* Log entries */}
+      {/* Error entries */}
       <div className="terminal-glass rounded-lg overflow-hidden max-h-[60vh] overflow-y-auto">
-        {filteredLogs.length === 0 ? (
+        {filteredErrors.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            No logs match your filter
+            <CheckCircle className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p className="font-medium">No errors logged</p>
+            <p className="text-xs mt-1 opacity-60">Errors will appear here when they occur</p>
           </div>
         ) : (
           <div className="divide-y divide-border/30">
-            {filteredLogs.map(log => {
-              const Icon = LEVEL_ICONS[log.level];
-              const isExpanded = expandedLogs.has(log.id);
-              const hasContext = log.context && Object.keys(log.context).length > 0;
-              const isRead = log.read;
+            {filteredErrors.map(error => {
+              const Icon = ERROR_ICON_COMPONENTS[error.type];
+              const isExpanded = expandedLogs.has(error.id);
+              const hasDetails = !!error.details;
               
               return (
-                <div key={log.id} className="group">
+                <div 
+                  key={error.id} 
+                  className={cn(
+                    "group transition-colors",
+                    error.pinned && "bg-primary/5 border-l-2 border-l-primary",
+                    !error.read && !error.pinned && "border-l-2 border-l-signal-blue"
+                  )}
+                >
                   <div className={cn(
-                    "p-3 transition-colors",
-                    isRead 
-                      ? "opacity-60 hover:opacity-80" 
-                      : "border-l-2 border-l-signal-blue hover:bg-secondary/30"
+                    "p-3",
+                    error.read && !error.pinned && "opacity-60 hover:opacity-80"
                   )}>
                     <div className="flex items-start gap-3">
                       <Icon className={cn(
                         "w-4 h-4 mt-0.5 flex-shrink-0", 
-                        LEVEL_STYLES[log.level].split(' ')[1],
-                        isRead && "opacity-60"
+                        ERROR_COLORS[error.type]
                       )} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className={cn(
-                            "badge text-[10px]", 
-                            LEVEL_STYLES[log.level],
-                            isRead && "opacity-60"
+                            "badge text-[10px] uppercase", 
+                            ERROR_BG_COLORS[error.type],
+                            ERROR_COLORS[error.type]
                           )}>
-                            {log.level.toUpperCase()}
+                            {error.type}
                           </span>
-                          <span className={cn(
-                            "font-mono text-xs",
-                            isRead ? "text-muted-foreground/50" : "text-muted-foreground"
-                          )}>
-                            {formatTime(log.timestamp)}
+                          <span className="font-mono text-xs text-muted-foreground">
+                            {formatTime(error.timestamp)}
                           </span>
                         </div>
-                        <p className={cn(
-                          "text-sm",
-                          isRead ? "text-muted-foreground" : "text-foreground"
-                        )}>
-                          {log.message}
+                        <p className="text-sm text-foreground">
+                          {error.message}
                         </p>
-                        {log.source && (
-                          <p className="text-xs text-muted-foreground/60 mt-1">Source: {log.source}</p>
+                        {error.source && (
+                          <p className="text-xs text-muted-foreground/60 mt-1">
+                            Source: {error.source}
+                          </p>
+                        )}
+                        {hasDetails && (
+                          <button
+                            onClick={() => toggleExpanded(error.id)}
+                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mt-2"
+                          >
+                            {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                            {isExpanded ? 'Hide details' : 'Show details'}
+                          </button>
                         )}
                       </div>
-                      {hasContext && (
+                      
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                           variant="ghost"
-                          size="sm"
-                          className="h-6 px-2 text-xs opacity-0 group-hover:opacity-100"
-                          onClick={() => toggleExpanded(log.id)}
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => handleAnalyzeWithAI(error.id, error.message, error.details)}
+                          disabled={error.isAnalyzing || !!error.aiSuggestion}
+                          title="Analyze with AI"
                         >
-                          {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                          {isExpanded ? 'Hide' : 'Details'}
+                          {error.isAnalyzing ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Sparkles className={cn(
+                              "w-3.5 h-3.5",
+                              error.aiSuggestion ? "text-signal-purple" : ""
+                            )} />
+                          )}
                         </Button>
-                      )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => togglePin(error.id)}
+                          title={error.pinned ? "Unpin" : "Pin"}
+                        >
+                          <Pin className={cn(
+                            "w-3.5 h-3.5",
+                            error.pinned && "fill-primary text-primary"
+                          )} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 hover:text-signal-red"
+                          onClick={() => deleteError(error.id)}
+                          title="Delete"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </div>
-                    {isExpanded && hasContext && (
+                    
+                    {/* Expandable details */}
+                    {isExpanded && hasDetails && (
                       <pre className="mt-3 p-3 bg-background/50 rounded text-xs font-mono text-muted-foreground overflow-x-auto">
-                        {JSON.stringify(log.context, null, 2)}
+                        {error.details}
                       </pre>
+                    )}
+                    
+                    {/* AI Suggestion */}
+                    {error.aiSuggestion && (
+                      <div className={cn(
+                        "mt-3 p-3 rounded-lg border",
+                        "bg-signal-purple/10 border-signal-purple/30"
+                      )}>
+                        <div className="flex items-center gap-2 text-xs text-signal-purple mb-1">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span className="font-medium">AI Suggestion</span>
+                        </div>
+                        <p className="text-sm text-foreground/90">
+                          {error.aiSuggestion}
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -257,31 +419,6 @@ export function LogsPanel() {
             })}
           </div>
         )}
-      </div>
-      
-      {/* Actions */}
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleMarkAllRead} 
-          className={cn(
-            "text-xs transition-colors",
-            justMarkedRead && "text-signal-green border-signal-green/50"
-          )}
-        >
-          <CheckCircle className={cn("w-3 h-3 mr-1.5", justMarkedRead && "text-signal-green")} /> 
-          {justMarkedRead ? 'Marked!' : 'Mark All Read'}
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => clearByLevel('error')} className="text-xs text-signal-red">
-          <Trash2 className="w-3 h-3 mr-1.5" /> Clear Errors
-        </Button>
-        <Button variant="outline" size="sm" onClick={exportLogs} className="text-xs">
-          <Download className="w-3 h-3 mr-1.5" /> Export
-        </Button>
-        <Button variant="destructive" size="sm" onClick={clearLogs} className="text-xs ml-auto">
-          <Trash2 className="w-3 h-3 mr-1.5" /> Clear All
-        </Button>
       </div>
     </div>
   );
