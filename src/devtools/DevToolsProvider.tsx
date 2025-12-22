@@ -78,7 +78,8 @@ export function DevToolsProvider({ children, config: userConfig }: DevToolsProvi
   // Store config
   useEffect(() => {
     setConfig(config);
-  }, [setConfig, config.app.name, config.app.version, config.app.environment]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.app.name, config.app.version, config.app.environment]); // setConfig is stable
 
   // Global keyboard shortcut
   useEffect(() => {
@@ -91,7 +92,8 @@ export function DevToolsProvider({ children, config: userConfig }: DevToolsProvi
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [toggleDrawer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // toggleDrawer is stable
 
   const contextValue: DevToolsContextValue = {
     config,
