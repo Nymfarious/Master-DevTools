@@ -67,17 +67,15 @@ const filterTabs: { key: FilterType; label: string }[] = [
 
 export function LogsPanel() {
   const errors = useErrorStore(selectSortedErrors);
-  const { 
-    togglePin, 
-    deleteError, 
-    markAsRead, 
-    markAllAsRead, 
-    clearErrors, 
-    clearReadErrors,
-    setAISuggestion,
-    setAnalyzing,
-    hasUnreadErrors
-  } = useErrorStore();
+  
+  // Use stable selectors for actions to avoid infinite re-renders
+  const togglePin = useErrorStore((s) => s.togglePin);
+  const deleteError = useErrorStore((s) => s.deleteError);
+  const markAllAsRead = useErrorStore((s) => s.markAllAsRead);
+  const clearErrors = useErrorStore((s) => s.clearErrors);
+  const clearReadErrors = useErrorStore((s) => s.clearReadErrors);
+  const setAISuggestion = useErrorStore((s) => s.setAISuggestion);
+  const setAnalyzing = useErrorStore((s) => s.setAnalyzing);
   
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -86,8 +84,7 @@ export function LogsPanel() {
   // Mark all as read when panel opens
   useEffect(() => {
     markAllAsRead();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, [markAllAsRead]);
 
   const filteredErrors = useMemo(() => {
     return errors.filter(error => {
