@@ -1,5 +1,5 @@
 // Quick Stats Bar v3.2.0 - Key metrics with navigation links
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Clock, Zap, AlertTriangle, AlertCircle, Activity, ClipboardCheck } from 'lucide-react';
 import { useLogsStore } from '@/stores/logsStore';
 import { useSystemStore } from '@/stores/systemStore';
@@ -56,7 +56,7 @@ export function QuickStatsBar() {
   const { uptime, incrementUptime } = useSystemStore();
   const { errors } = useErrorStore();
   const { events } = usePipelineStore();
-  const { getCompletionPercentage } = useBuildStatusStore();
+  const { features } = useBuildStatusStore();
   const { setActiveSection } = useAppStore();
   const [apiCalls, setApiCalls] = useState(1247);
   
@@ -66,8 +66,11 @@ export function QuickStatsBar() {
   // Count active pipelines (simulated - use events that are recent)
   const activePipelines = events.filter(e => !e.success).length;
   
-  // Build completion
-  const buildCompletion = getCompletionPercentage();
+  // Build completion - memoized
+  const buildCompletion = useMemo(() => {
+    const complete = features.filter(f => f.status === 'complete').length;
+    return Math.round((complete / features.length) * 100);
+  }, [features]);
   
   // Count warnings from logs
   const warnCount = logs.filter(l => l.level === 'warn').length;

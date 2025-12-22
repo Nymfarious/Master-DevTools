@@ -15,12 +15,6 @@ interface BuildStatusStore {
   addNote: (content: string, priority?: Priority) => void;
   toggleNoteResolved: (id: string) => void;
   deleteNote: (id: string) => void;
-  
-  // Computed
-  getCompletionPercentage: () => number;
-  getActiveNotes: () => DevNote[];
-  getResolvedNotes: () => DevNote[];
-  getFeaturesByCategory: () => Record<string, BuildFeature[]>;
 }
 
 // Initial feature data for Master DevTools
@@ -58,7 +52,7 @@ const INITIAL_DEPENDENCIES: DependencyItem[] = [
 
 export const useBuildStatusStore = create<BuildStatusStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       features: INITIAL_FEATURES,
       notes: [],
       dependencies: INITIAL_DEPENDENCIES,
@@ -88,26 +82,6 @@ export const useBuildStatusStore = create<BuildStatusStore>()(
       deleteNote: (id) => set(state => ({
         notes: state.notes.filter(n => n.id !== id),
       })),
-
-      getCompletionPercentage: () => {
-        const features = get().features;
-        const complete = features.filter(f => f.status === 'complete').length;
-        return Math.round((complete / features.length) * 100);
-      },
-
-      getActiveNotes: () => get().notes.filter(n => !n.resolved),
-      getResolvedNotes: () => get().notes.filter(n => n.resolved),
-      
-      getFeaturesByCategory: () => {
-        const features = get().features;
-        return features.reduce((acc, feature) => {
-          if (!acc[feature.category]) {
-            acc[feature.category] = [];
-          }
-          acc[feature.category].push(feature);
-          return acc;
-        }, {} as Record<string, BuildFeature[]>);
-      },
     }),
     {
       name: 'master-devtools-build-status',

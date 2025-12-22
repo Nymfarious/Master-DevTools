@@ -1,5 +1,5 @@
 // Build Status Panel - Track feature completion, notes, and dependencies
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Check, Trash2, Plus, Circle, CheckCircle2, Clock, AlertCircle, Layers } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuildStatusStore } from '@/stores/buildStatusStore';
 import { 
+  BuildFeature,
   FeatureStatus, 
   Priority, 
   STATUS_STYLES, 
@@ -30,10 +31,6 @@ export function BuildStatusPanel() {
     addNote,
     toggleNoteResolved,
     deleteNote,
-    getCompletionPercentage,
-    getActiveNotes,
-    getResolvedNotes,
-    getFeaturesByCategory
   } = useBuildStatusStore();
 
   const [newNote, setNewNote] = useState('');
@@ -45,10 +42,24 @@ export function BuildStatusPanel() {
     Tools: true,
   });
 
-  const completion = getCompletionPercentage();
-  const featuresByCategory = getFeaturesByCategory();
-  const activeNotes = getActiveNotes();
-  const resolvedNotes = getResolvedNotes();
+  // Memoized computed values to prevent infinite loops
+  const completion = useMemo(() => {
+    const complete = features.filter(f => f.status === 'complete').length;
+    return Math.round((complete / features.length) * 100);
+  }, [features]);
+
+  const featuresByCategory = useMemo(() => {
+    return features.reduce((acc, feature) => {
+      if (!acc[feature.category]) {
+        acc[feature.category] = [];
+      }
+      acc[feature.category].push(feature);
+      return acc;
+    }, {} as Record<string, BuildFeature[]>);
+  }, [features]);
+
+  const activeNotes = useMemo(() => notes.filter(n => !n.resolved), [notes]);
+  const resolvedNotes = useMemo(() => notes.filter(n => n.resolved), [notes]);
 
   const handleAddNote = () => {
     if (newNote.trim()) {
