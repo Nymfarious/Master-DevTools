@@ -86,7 +86,8 @@ export function LogsPanel() {
   // Mark all as read when panel opens
   useEffect(() => {
     markAllAsRead();
-  }, [markAllAsRead]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const filteredErrors = useMemo(() => {
     return errors.filter(error => {
