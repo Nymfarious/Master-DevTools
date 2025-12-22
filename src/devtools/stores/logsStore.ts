@@ -86,32 +86,65 @@ export const logEvent = (
  * Call once at app startup to capture console errors
  */
 export const initializeErrorInterception = () => {
+  // Make interception idempotent across HMR / multiple providers
+  const FLAG = '__lovable_devtools_error_interception_initialized__';
+  const g = globalThis as unknown as Record<string, unknown>;
+  if (g[FLAG]) return;
+  g[FLAG] = true;
+
   const originalError = console.error;
   const originalWarn = console.warn;
 
+  const safeLog = (level: LogLevel, args: unknown[], source: string) => {
+    const message = args
+      .map((a) => {
+        if (typeof a === 'string') return a;
+        try {
+          return JSON.stringify(a);
+        } catch {
+          return String(a);
+        }
+      })
+      .join(' ');
+
+    // Defer to avoid Zustand updates during React render/commit
+    queueMicrotask(() => {
+      try {
+        logEvent(level, message, undefined, source);
+      } catch {
+        // noop
+      }
+    });
+  };
+
   console.error = (...args) => {
-    originalError.apply(console, args);
-    const message = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-    logEvent('error', message, undefined, 'console.error');
+    originalError.apply(console, args as never);
+    safeLog('error', args, 'console.error');
   };
 
   console.warn = (...args) => {
-    originalWarn.apply(console, args);
-    const message = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-    logEvent('warn', message, undefined, 'console.warn');
+    originalWarn.apply(console, args as never);
+    safeLog('warn', args, 'console.warn');
   };
 
-  // Global error handler
   window.addEventListener('error', (event) => {
-    logEvent('error', event.message, {
-      filename: event.filename,
-      lineno: event.lineno,
-      colno: event.colno,
-    }, 'window.onerror');
+    queueMicrotask(() => {
+      logEvent(
+        'error',
+        event.message,
+        {
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+        },
+        'window.onerror'
+      );
+    });
   });
 
-  // Unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
-    logEvent('error', `Unhandled Promise Rejection: ${event.reason}`, undefined, 'promise');
+    queueMicrotask(() => {
+      logEvent('error', `Unhandled Promise Rejection: ${event.reason}`, undefined, 'promise');
+    });
   });
 };
