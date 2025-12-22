@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Search, Terminal, User } from 'lucide-react';
+import { Search, Terminal, User, AlertCircle } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useSystemStore } from '@/stores/systemStore';
+import { useErrorStore } from '@/stores/errorStore';
 import { cn } from '@/lib/utils';
 
 export function Header() {
   const [time, setTime] = useState(new Date());
   const { setCommandPaletteOpen } = useAppStore();
   const { connectionStatus, systemHealth } = useSystemStore();
+  const hasUnreadErrors = useErrorStore(state => state.hasUnreadErrors);
+  const errorCount = useErrorStore(state => state.errors.filter(e => !e.read).length);
 
   // Live clock
   useEffect(() => {
@@ -39,7 +42,13 @@ export function Header() {
               DEVTOOLS
             </span>
           </div>
-          <span className="text-[10px] font-mono text-muted-foreground/60">v3.1.0</span>
+          <span className="text-[10px] font-mono text-muted-foreground/60">v3.2.0</span>
+          {hasUnreadErrors && (
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-signal-red/20 text-signal-red">
+              <AlertCircle className="w-3 h-3" />
+              <span className="text-[10px] font-mono">{errorCount}</span>
+            </div>
+          )}
         </div>
 
         {/* Center: Search */}

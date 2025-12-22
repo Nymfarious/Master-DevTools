@@ -6,6 +6,7 @@ import { EchoverseApps } from '@/components/overview/EchoverseApps';
 import { LiveActivityFeed } from '@/components/overview/LiveActivityFeed';
 import { FileMetricsCard } from '@/components/overview/FileMetricsCard';
 import { DemoLogGenerator } from '@/components/overview/DemoLogGenerator';
+import { DemoErrorGenerator } from '@/components/overview/DemoErrorGenerator';
 import { APIHealthCard } from '@/components/overview/APIHealthCard';
 
 export function OverviewPanel() {
@@ -32,8 +33,11 @@ export function OverviewPanel() {
       {/* File Metrics Card - Line count monitoring */}
       <FileMetricsCard />
       
-      {/* Demo Log Generator - For testing red dot system */}
-      <DemoLogGenerator />
+      {/* Demo Generators - For testing */}
+      <div className="flex flex-wrap items-center gap-4">
+        <DemoLogGenerator />
+        <DemoErrorGenerator />
+      </div>
     </div>
   );
 }
