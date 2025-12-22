@@ -216,16 +216,28 @@ export const logDevEvent = (
 
 // Auto-intercept console errors (call this once at app init)
 export const initializeErrorInterception = () => {
+  // Make interception idempotent across HMR / multiple providers
+  const FLAG = '__lovable_mini_devtools_error_interception_initialized__';
+  const g = globalThis as unknown as Record<string, unknown>;
+  if (g[FLAG]) return;
+  g[FLAG] = true;
+
   const originalError = console.error;
   const originalWarn = console.warn;
 
-  // Avoid re-entrancy and avoid state updates during render
+  // Avoid state updates during render and avoid hard failures if logging throws
   const safeLog = (level: LogLevel, args: unknown[], source: string) => {
     const message = args
-      .map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a)))
+      .map((a) => {
+        if (typeof a === 'string') return a;
+        try {
+          return JSON.stringify(a);
+        } catch {
+          return String(a);
+        }
+      })
       .join(' ');
 
-    // Defer store updates to avoid React "setState during render" loops caused by warnings
     queueMicrotask(() => {
       try {
         logDevEvent(level, message, undefined, source);
@@ -245,7 +257,6 @@ export const initializeErrorInterception = () => {
     safeLog('warn', args, 'console.warn');
   };
 
-  // Global error handler
   window.addEventListener('error', (event) => {
     queueMicrotask(() => {
       logDevEvent(
@@ -261,7 +272,6 @@ export const initializeErrorInterception = () => {
     });
   });
 
-  // Unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
     queueMicrotask(() => {
       logDevEvent('error', `Unhandled Promise Rejection: ${event.reason}`, undefined, 'promise');
