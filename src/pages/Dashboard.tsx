@@ -17,6 +17,7 @@ import { AgentsPanel } from '@/components/panels/AgentsPanel';
 import { AnimationPanel } from '@/components/panels/AnimationPanel';
 import { TestLabPanel } from '@/components/panels/TestLabPanel';
 import { MediaMonitorPanel } from '@/components/panels/MediaMonitorPanel';
+import { BuildStatusPanel } from '@/components/panels/BuildStatusPanel';
 import { ShortcutsPanel } from '@/devtools/components/ShortcutsPanel';
 import { StyleGuidePanel } from '@/devtools/components/StyleGuidePanel';
 import { PanelGeneratorPanel } from '@/devtools/components/PanelGeneratorPanel';
@@ -88,6 +89,8 @@ export default function Dashboard() {
         return <LibrariesPanel />;
       
       // TOOLS
+      case 'build-status':
+        return <BuildStatusPanel />;
       case 'generator':
         return <PanelGeneratorPanel />;
       case 'export':

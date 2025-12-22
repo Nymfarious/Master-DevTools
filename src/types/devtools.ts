@@ -21,6 +21,7 @@ export type SectionId =
   | 'shortcuts'
   | 'libraries'
   // TOOLS
+  | 'build-status'  // NEW: Build Status
   | 'generator'
   | 'export'
   | 'settings'

@@ -157,6 +157,7 @@ export const SettingsPanel = () => <PlaceholderPanel sectionId="settings" />;
 export const TestLabPanel = () => <PlaceholderPanel sectionId="testlab" />;
 export const MediaMonitorPanel = () => <PlaceholderPanel sectionId="media" />;
 export const TestingPanel = () => <PlaceholderPanel sectionId="testing" />;
+export const BuildStatusPanelMini = () => <PlaceholderPanel sectionId="build-status" />;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PANEL ROUTER
@@ -185,6 +186,7 @@ const panelComponents: Record<SectionId, React.ComponentType<PanelProps>> = {
   testlab: TestLabPanel,
   media: MediaMonitorPanel,
   testing: TestingPanel,
+  'build-status': BuildStatusPanelMini,
 };
 
 export function PanelRouter({ activeSection }: { activeSection: SectionId }) {
