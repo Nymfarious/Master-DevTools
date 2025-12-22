@@ -63,17 +63,11 @@ interface LogsState {
   clearByLevel: (level: LogLevel) => void;
 }
 
-export const useDevLogsStore = create<LogsState>()((set, get) => ({
+export const useDevLogsStore = create<LogsState>()((set) => ({
   logs: [],
   maxLogs: 200,
-  
-  get hasUnreadErrors() {
-    return get().logs.some(log => !log.read && (log.level === 'error' || log.level === 'warn'));
-  },
-  
-  get unreadCount() {
-    return get().logs.filter(log => !log.read).length;
-  },
+  hasUnreadErrors: false,
+  unreadCount: 0,
 
   addLog: (level, message, context, source) => set((state) => {
     const newLog: DevLogEntry = {
@@ -225,29 +219,52 @@ export const initializeErrorInterception = () => {
   const originalError = console.error;
   const originalWarn = console.warn;
 
+  // Avoid re-entrancy and avoid state updates during render
+  const safeLog = (level: LogLevel, args: unknown[], source: string) => {
+    const message = args
+      .map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a)))
+      .join(' ');
+
+    // Defer store updates to avoid React "setState during render" loops caused by warnings
+    queueMicrotask(() => {
+      try {
+        logDevEvent(level, message, undefined, source);
+      } catch {
+        // noop
+      }
+    });
+  };
+
   console.error = (...args) => {
-    originalError.apply(console, args);
-    const message = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-    logDevEvent('error', message, undefined, 'console.error');
+    originalError.apply(console, args as never);
+    safeLog('error', args, 'console.error');
   };
 
   console.warn = (...args) => {
-    originalWarn.apply(console, args);
-    const message = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-    logDevEvent('warn', message, undefined, 'console.warn');
+    originalWarn.apply(console, args as never);
+    safeLog('warn', args, 'console.warn');
   };
 
   // Global error handler
   window.addEventListener('error', (event) => {
-    logDevEvent('error', event.message, {
-      filename: event.filename,
-      lineno: event.lineno,
-      colno: event.colno,
-    }, 'window.onerror');
+    queueMicrotask(() => {
+      logDevEvent(
+        'error',
+        event.message,
+        {
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+        },
+        'window.onerror'
+      );
+    });
   });
 
   // Unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
-    logDevEvent('error', `Unhandled Promise Rejection: ${event.reason}`, undefined, 'promise');
+    queueMicrotask(() => {
+      logDevEvent('error', `Unhandled Promise Rejection: ${event.reason}`, undefined, 'promise');
+    });
   });
 };
