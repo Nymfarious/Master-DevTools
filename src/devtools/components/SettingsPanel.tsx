@@ -1,5 +1,5 @@
-// Settings Panel v3.0.0 - DevTools configuration with auth bypass and connection control
-import { Settings, RefreshCw, Eye, Activity, Beaker, Bot, Code, Upload, ChevronDown, Plus, MoreHorizontal, Zap, Palette, Keyboard, Info, ShieldOff, Unplug } from 'lucide-react';
+// Settings Panel v3.1.0 - DevTools configuration with error interception toggle
+import { Settings, RefreshCw, Eye, Activity, Beaker, Bot, Code, Upload, ChevronDown, Plus, MoreHorizontal, Zap, Palette, Keyboard, Info, ShieldOff, Unplug, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -187,6 +187,20 @@ export function SettingsPanel() {
                 checked={settings.fpsMonitoringEnabled}
                 onCheckedChange={(checked) => updateSettings({ fpsMonitoringEnabled: checked })}
               />
+              <SettingRow
+                icon={Bug}
+                label="Error Interception"
+                description="Capture console.error/warn to DevTools logs"
+                checked={settings.errorInterceptionEnabled}
+                onCheckedChange={(checked) => updateSettings({ errorInterceptionEnabled: checked })}
+              />
+              {!settings.errorInterceptionEnabled && (
+                <div className="p-3 rounded-lg bg-signal-amber/10 border border-signal-amber/30">
+                  <p className="text-xs text-signal-amber font-mono">
+                    ⚠️ Error interception disabled. Console errors won't appear in Logs panel.
+                  </p>
+                </div>
+              )}
             </div>
           </CollapsibleSection>
 
