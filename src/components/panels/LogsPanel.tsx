@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useErrorStore, selectSortedErrors } from '@/stores/errorStore';
+import { useErrorStore } from '@/stores/errorStore';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { 
@@ -66,7 +66,8 @@ const filterTabs: { key: FilterType; label: string }[] = [
 ];
 
 export function LogsPanel() {
-  const errors = useErrorStore(selectSortedErrors);
+  // Subscribe to errors array directly with shallow equality
+  const rawErrors = useErrorStore((state) => state.errors);
   const { 
     togglePin, 
     deleteError, 
@@ -78,6 +79,14 @@ export function LogsPanel() {
     setAnalyzing,
     hasUnreadErrors
   } = useErrorStore();
+  
+  // Memoize sorted errors to prevent infinite rerender loop
+  const errors = useMemo(() => 
+    [...rawErrors].sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return b.timestamp - a.timestamp;
+    }), [rawErrors]);
   
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
