@@ -1,9 +1,12 @@
-// Quick Stats Bar - Key metrics in a horizontal row
-// Lines: ~95 | Status: GREEN
+// Quick Stats Bar v3.2.0 - Key metrics with navigation links
 import { useEffect, useState } from 'react';
-import { Clock, Zap, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Clock, Zap, AlertTriangle, AlertCircle, Activity, ClipboardCheck } from 'lucide-react';
 import { useLogsStore } from '@/stores/logsStore';
 import { useSystemStore } from '@/stores/systemStore';
+import { useErrorStore } from '@/stores/errorStore';
+import { usePipelineStore } from '@/stores/pipelineStore';
+import { useBuildStatusStore } from '@/stores/buildStatusStore';
+import { useAppStore } from '@/stores/appStore';
 import { cn } from '@/lib/utils';
 
 interface StatItemProps {
@@ -11,20 +14,29 @@ interface StatItemProps {
   value: string | number;
   subtext?: string;
   icon: typeof Clock;
-  color: 'green' | 'blue' | 'amber' | 'red' | 'muted';
+  color: 'green' | 'blue' | 'amber' | 'red' | 'muted' | 'purple';
+  onClick?: () => void;
+  clickable?: boolean;
 }
 
-function StatItem({ label, value, subtext, icon: Icon, color }: StatItemProps) {
+function StatItem({ label, value, subtext, icon: Icon, color, onClick, clickable }: StatItemProps) {
   const colorClasses = {
     green: 'text-signal-green',
     blue: 'text-signal-blue',
     amber: 'text-signal-amber',
     red: 'text-signal-red',
+    purple: 'text-signal-purple',
     muted: 'text-muted-foreground',
   };
 
   return (
-    <div className="terminal-glass p-4 rounded-lg flex-1">
+    <div 
+      className={cn(
+        "terminal-glass p-4 rounded-lg flex-1 transition-all",
+        clickable && "cursor-pointer hover:ring-1 hover:ring-primary/30 hover:bg-card/60"
+      )}
+      onClick={onClick}
+    >
       <div className="flex items-center gap-2 mb-2">
         <Icon className={cn("w-4 h-4", colorClasses[color])} />
         <span className="text-xs text-muted-foreground uppercase tracking-wide">{label}</span>
@@ -42,10 +54,22 @@ function StatItem({ label, value, subtext, icon: Icon, color }: StatItemProps) {
 export function QuickStatsBar() {
   const { logs } = useLogsStore();
   const { uptime, incrementUptime } = useSystemStore();
+  const { errors } = useErrorStore();
+  const { events } = usePipelineStore();
+  const { getCompletionPercentage } = useBuildStatusStore();
+  const { setActiveSection } = useAppStore();
   const [apiCalls, setApiCalls] = useState(1247);
   
-  // Count errors and warnings
-  const errorCount = logs.filter(l => l.level === 'error').length;
+  // Count from error store
+  const activeErrors = errors.length;
+  
+  // Count active pipelines (simulated - use events that are recent)
+  const activePipelines = events.filter(e => !e.success).length;
+  
+  // Build completion
+  const buildCompletion = getCompletionPercentage();
+  
+  // Count warnings from logs
   const warnCount = logs.filter(l => l.level === 'warn').length;
   
   // Format uptime as HH:MM:SS or Xh Xm
@@ -77,7 +101,7 @@ export function QuickStatsBar() {
   }, []);
 
   return (
-    <section className="grid grid-cols-4 gap-3">
+    <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       <StatItem 
         label="Uptime" 
         value={formatUptime(uptime)} 
@@ -92,16 +116,36 @@ export function QuickStatsBar() {
         color="blue" 
       />
       <StatItem 
-        label="Errors (24h)" 
-        value={errorCount} 
+        label="Active Errors" 
+        value={activeErrors} 
         icon={AlertCircle} 
-        color={errorCount > 0 ? 'red' : 'green'} 
+        color={activeErrors > 0 ? 'red' : 'green'} 
+        clickable
+        onClick={() => setActiveSection('logs')}
       />
       <StatItem 
-        label="Warnings (24h)" 
+        label="Warnings" 
         value={warnCount} 
         icon={AlertTriangle} 
         color={warnCount > 0 ? 'amber' : 'green'} 
+      />
+      <StatItem 
+        label="Pipelines" 
+        value={activePipelines} 
+        subtext="active"
+        icon={Activity} 
+        color={activePipelines > 0 ? 'blue' : 'muted'} 
+        clickable
+        onClick={() => setActiveSection('pipeline')}
+      />
+      <StatItem 
+        label="Build" 
+        value={`${buildCompletion}%`} 
+        subtext="complete"
+        icon={ClipboardCheck} 
+        color={buildCompletion >= 80 ? 'green' : buildCompletion >= 50 ? 'amber' : 'muted'} 
+        clickable
+        onClick={() => setActiveSection('build-status')}
       />
     </section>
   );

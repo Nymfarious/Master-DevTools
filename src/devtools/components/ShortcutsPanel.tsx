@@ -73,6 +73,14 @@ export function ShortcutsPanel() {
       action: () => setActiveSection('pipeline') 
     },
     { 
+      id: 'nav-build-status', 
+      name: 'Go to Build Status', 
+      description: 'Jump to Build Status panel', 
+      keys: [modKey, 'B'], 
+      category: 'navigation', 
+      action: () => setActiveSection('build-status') 
+    },
+    { 
       id: 'close-drawer', 
       name: 'Close Drawer', 
       description: 'Close DevTools drawer', 

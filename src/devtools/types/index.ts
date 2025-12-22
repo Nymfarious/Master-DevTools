@@ -86,7 +86,11 @@ export type SectionId =
   | 'styleguide'
   | 'generator'
   | 'export'
-  | 'settings';
+  | 'settings'
+  | 'build-status'
+  | 'testing'
+  | 'media'
+  | 'testlab';
 
 export interface DevToolsSection {
   id: SectionId;

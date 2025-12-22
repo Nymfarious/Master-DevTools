@@ -31,6 +31,10 @@ import { StyleGuidePanel } from './StyleGuidePanel';
 import { PanelGeneratorPanel } from './PanelGeneratorPanel';
 import { ExportPanel } from './ExportPanel';
 
+// v3.2.0 panels
+import { BuildStatusPanel } from '@/components/panels/BuildStatusPanel';
+import { MediaMonitorPanel } from '@/components/panels/MediaMonitorPanel';
+
 // ═══════════════════════════════════════════════════════════════════════════
 // PANEL MAPPING
 // ═══════════════════════════════════════════════════════════════════════════
@@ -56,6 +60,11 @@ const panelComponents: Record<SectionId, React.ComponentType> = {
   generator: PanelGeneratorPanel,
   export: ExportPanel,
   settings: SettingsPanel,
+  // v3.2.0 panels
+  'build-status': BuildStatusPanel,
+  media: MediaMonitorPanel,
+  testing: TestLabPanel,
+  testlab: TestLabPanel,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
