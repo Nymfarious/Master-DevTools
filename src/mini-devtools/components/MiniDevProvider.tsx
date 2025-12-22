@@ -43,29 +43,36 @@ export function MiniDevProvider({
 }: MiniDevProviderProps) {
   const { isOpen, openDrawer, closeDrawer, toggleDrawer, setConfig } = useDevToolsStore();
 
-  // Merge default config with user config
+  // Memoize config to prevent infinite loops
+  const appName = userConfig?.app?.name || 'Master DevTools';
+  const appVersion = userConfig?.app?.version || '1.0.0';
+  const appEnvironment = userConfig?.app?.environment || 'development';
+  const position = userConfig?.position || 'bottom-right';
+  const theme = userConfig?.theme || 'dark';
+
   const config: MiniDevConfig = {
     app: {
-      name: userConfig?.app?.name || 'Master DevTools',
-      version: userConfig?.app?.version || '1.0.0',
-      environment: userConfig?.app?.environment || 'development',
+      name: appName,
+      version: appVersion,
+      environment: appEnvironment,
     },
-    position: userConfig?.position || 'bottom-right',
-    theme: userConfig?.theme || 'dark',
+    position,
+    theme,
     panels: userConfig?.panels,
     customPanels: userConfig?.customPanels,
     isDev: isDev,
   };
 
-  // Initialize error interception on mount
+  // Initialize error interception on mount only
   useEffect(() => {
     initializeErrorInterception();
   }, []);
 
-  // Set config in store
+  // Set config in store - only when actual values change
   useEffect(() => {
     setConfig(config);
-  }, [setConfig, config.app.name, config.app.version, config.app.environment]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setConfig, appName, appVersion, appEnvironment, position, theme, isDev]);
 
   // Global keyboard shortcut to toggle drawer
   useEffect(() => {
