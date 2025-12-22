@@ -15,6 +15,7 @@ import {
   Wand2,
   Archive,
   FlaskConical,
+  ClipboardCheck,
   LucideIcon 
 } from 'lucide-react';
 import type { SectionId, DevToolsSection } from '@/types/devtools';
@@ -167,6 +168,14 @@ export const REFERENCE_SECTIONS: DevToolsSection[] = [
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const TOOLS_SECTIONS: DevToolsSection[] = [
+  {
+    id: 'build-status',
+    label: 'Build Status',
+    icon: ClipboardCheck,
+    description: 'Track feature completion and dev notes',
+    shortcut: '⌘B',
+    phase: 1,
+  },
   {
     id: 'generator',
     label: 'Generator',
