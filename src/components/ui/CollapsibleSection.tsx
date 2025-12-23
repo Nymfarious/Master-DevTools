@@ -4,9 +4,11 @@ import { cn } from '@/lib/utils';
 import { useSettingsStore, type ExpandIconStyle } from '@/devtools/stores/settingsStore';
 
 interface CollapsibleSectionProps {
+  id?: string;
   title: string;
   icon?: LucideIcon;
   defaultOpen?: boolean;
+  defaultCollapsed?: boolean; // Alternative to defaultOpen for clarity
   children: React.ReactNode;
   className?: string;
 }
@@ -30,17 +32,21 @@ function ExpandIcon({ style, isOpen }: { style: ExpandIconStyle; isOpen: boolean
 }
 
 export function CollapsibleSection({ 
+  id,
   title, 
   icon: Icon, 
-  defaultOpen = false, 
+  defaultOpen = false,
+  defaultCollapsed,
   children,
   className 
 }: CollapsibleSectionProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  // defaultCollapsed takes precedence if provided
+  const initialOpen = defaultCollapsed !== undefined ? !defaultCollapsed : defaultOpen;
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const { settings } = useSettingsStore();
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div id={id} className={cn('space-y-2', className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
