@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AppShell } from '@/components/layout/AppShell';
 import { AppLauncherPanel } from '@/components/panels/AppLauncherPanel';
 import { LogsPanel } from '@/components/panels/LogsPanel';
-import { UITokensPanel } from '@/components/panels/UITokensPanel';
+import { AppStyleGuidePanel } from '@/components/panels/AppStyleGuidePanel';
 import { PipelinePanel } from '@/components/panels/PipelinePanel';
 import { APIRegistryPanel } from '@/components/panels/APIRegistryPanel';
 import { SecurityPanel } from '@/components/panels/SecurityPanel';
@@ -19,7 +19,7 @@ import { TestLabPanel } from '@/components/panels/TestLabPanel';
 import { MediaMonitorPanel } from '@/components/panels/MediaMonitorPanel';
 import { BuildStatusPanel } from '@/components/panels/BuildStatusPanel';
 import { ShortcutsPanel } from '@/devtools/components/ShortcutsPanel';
-import { StyleGuidePanel } from '@/devtools/components/StyleGuidePanel';
+
 import { PanelGeneratorPanel } from '@/devtools/components/PanelGeneratorPanel';
 import { ExportPanel } from '@/devtools/components/ExportPanel';
 import { SettingsPanel } from '@/devtools/components/SettingsPanel';
@@ -81,7 +81,7 @@ export default function Dashboard() {
       
       // REFERENCE
       case 'styleguide':
-        return <StyleGuidePanel />;
+        return <AppStyleGuidePanel />;
       case 'shortcuts':
         return <ShortcutsPanel />;
       case 'libraries':
@@ -99,7 +99,7 @@ export default function Dashboard() {
       
       // LEGACY - kept for backwards compatibility
       case 'tokens':
-        return <UITokensPanel />;
+        return <AppStyleGuidePanel />;
       case 'data':
         return <DataTestPanel />;
       case 'audio':
