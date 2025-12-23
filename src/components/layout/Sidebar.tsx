@@ -147,7 +147,7 @@ function NavItem({ section, isActive, hasAlert, onClick }: NavItemProps) {
             )}
           </button>
         </TooltipTrigger>
-        <TooltipContent side="right" className="flex flex-col gap-1">
+        <TooltipContent side="right" sideOffset={8} className="flex flex-col gap-1 ml-2">
           <span className="font-medium">{section.label}</span>
           <span className="text-xs text-muted-foreground">{section.description}</span>
         </TooltipContent>

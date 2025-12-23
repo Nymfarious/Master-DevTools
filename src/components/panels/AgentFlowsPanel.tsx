@@ -610,7 +610,7 @@ export function AgentFlowsPanel() {
           </div>
 
           {/* Workflow Editor Tab */}
-          <TabsContent value="workflow" className="flex-1 flex flex-col space-y-4 mt-0">
+          <TabsContent value="workflow" className="flex-1 flex flex-col space-y-4 mt-0 overflow-hidden">
             {/* View Toggle & Zoom Controls */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -679,20 +679,22 @@ export function AgentFlowsPanel() {
               </div>
             )}
 
-            <div className="flex gap-4 flex-1 min-h-0">
+            <div className="flex gap-4 flex-1 min-h-0 pb-4">
               {/* Canvas */}
               <div
                 ref={containerRef}
-                className="relative flex-1 bg-terminal-bg border border-terminal-border rounded-lg overflow-hidden cursor-move grid-bg"
+                className="relative flex-1 border border-terminal-border rounded-lg overflow-hidden cursor-move grid-bg"
                 onWheel={handleWheel}
                 onMouseDown={handlePan}
               >
+                {/* Workflow area overlay - subtle differentiation from background grid */}
+                <div className="absolute inset-0 bg-muted/5 backdrop-blur-[0.5px]" />
                 <div
                   style={{
                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
                     transformOrigin: '0 0',
                   }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 z-10"
                 >
                   <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
                     {currentEdges.map(edge => {
@@ -791,8 +793,8 @@ export function AgentFlowsPanel() {
           </TabsContent>
 
           {/* Registered Agents Tab */}
-          <TabsContent value="agents" className="flex-1 mt-0">
-            <ResizablePanelGroup direction="vertical" className="flex-1 h-full">
+          <TabsContent value="agents" className="flex-1 mt-0 h-full">
+            <ResizablePanelGroup direction="vertical" className="h-full min-h-[400px]">
               <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
                 <div className="h-full flex flex-col">
                   <div className="section-header flex items-center justify-between">
