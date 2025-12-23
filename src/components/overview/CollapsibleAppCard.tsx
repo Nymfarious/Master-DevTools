@@ -103,7 +103,7 @@ export function CollapsibleAppCard({
               />
             )}
             {isLoaded && (
-              <span className="badge badge--green text-[9px] shrink-0">
+              <span className="badge badge--green text-[9px] shrink-0 animate-pulse-once">
                 Active
               </span>
             )}
