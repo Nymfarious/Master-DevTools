@@ -4,7 +4,7 @@ import type { SectionId, CustomPanelConfig } from '../types';
 import { getSectionById } from '../config/sections';
 
 // ── Direct imports for panels ─────────────────────────────────────────────
-import { OverviewPanel } from '@/components/panels/OverviewPanel';
+import { AppLauncherPanel } from '@/components/panels/AppLauncherPanel';
 import { LogsPanel } from '@/components/panels/LogsPanel';
 import { APIRegistryPanel } from '@/components/panels/APIRegistryPanel';
 import { PipelinePanel } from '@/components/panels/PipelinePanel';
@@ -40,8 +40,8 @@ import { MediaMonitorPanel } from '@/components/panels/MediaMonitorPanel';
 // ═══════════════════════════════════════════════════════════════════════════
 
 const panelComponents: Record<SectionId, React.ComponentType> = {
-  overview: OverviewPanel,
-  apps: IssuesPanel, // Issue tracker replaces apps placeholder
+  overview: AppLauncherPanel,
+  apps: AppLauncherPanel, // Both now point to consolidated App Launcher
   apis: APIRegistryPanel,
   logs: LogsPanel,
   pipeline: PipelinePanel,
