@@ -5,3 +5,4 @@ export * from './flowchartData';
 export * from './flowchartHelpers';
 export { FlowchartNode } from './FlowchartNode';
 export { ConnectionLine } from './ConnectionLine';
+export { AppsMapView } from './AppsMapView';

@@ -92,11 +92,11 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
   },
   {
     id: 'content',
-    label: 'Content',
-    icon: FileJson,
-    description: 'JSON content inspector',
+    label: 'Agent Flows',
+    icon: Workflow,
+    description: 'Multi-agent workflow creator',
     shortcut: '⌘0',
-    phase: 5,
+    phase: 3,
   },
   {
     id: 'audio',

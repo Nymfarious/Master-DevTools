@@ -1,7 +1,7 @@
 // Flowchart Helpers - ~50 lines
 // Color mappings and icon utilities
 
-import { Terminal, Book, Heart, Music, GitBranch, Map, Database } from 'lucide-react';
+import { Terminal, Book, Heart, Music, GitBranch, Map, Database, Bot, Search, Sparkles, Code, MessageSquare, Merge, User } from 'lucide-react';
 import type { PortType, NodeType } from './flowchartTypes';
 
 export const portColors: Record<PortType, string> = {
@@ -30,6 +30,14 @@ export const iconMap: Record<string, typeof Terminal> = {
   'git-branch': GitBranch,
   map: Map,
   database: Database,
+  // Agent flow icons
+  bot: Bot,
+  search: Search,
+  sparkles: Sparkles,
+  code: Code,
+  'message-square': MessageSquare,
+  merge: Merge,
+  user: User,
 };
 
 export const portTypeColorMap: Record<PortType, string> = {
