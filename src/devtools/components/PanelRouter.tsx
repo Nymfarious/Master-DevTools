@@ -15,7 +15,7 @@ import { AppStyleGuidePanel } from '@/components/panels/AppStyleGuidePanel';
 import { AgentFlowsPanel } from '@/components/panels/AgentFlowsPanel';
 import { AudioPanel } from '@/components/panels/AudioPanel';
 import { FlowchartPanel } from '@/components/panels/FlowchartPanel';
-import { AgentsPanel } from '@/components/panels/AgentsPanel';
+
 import { AnimationPanel } from '@/components/panels/AnimationPanel';
 
 // Phase 8 panels
@@ -51,7 +51,7 @@ const panelComponents: Record<SectionId, React.ComponentType> = {
   content: AgentFlowsPanel,
   audio: AudioPanel,
   flowchart: FlowchartPanel,
-  agents: AgentsPanel,
+  agents: AgentFlowsPanel, // Merged into Agent Flows
   video: AnimationPanel,
   // Phase 10 panels
   shortcuts: ShortcutsPanel,

@@ -130,17 +130,9 @@ export const REFERENCE_SECTIONS: DevToolsSection[] = [
     phase: 6,
   },
   {
-    id: 'agents',
-    label: 'MCP/Agents',
-    icon: Bot,
-    description: 'AI agent management',
-    shortcut: '⌘A',
-    phase: 6,
-  },
-  {
     id: 'content',
     label: 'Agent Flows',
-    icon: Workflow,
+    icon: Bot,
     description: 'Multi-agent workflow creator',
     shortcut: '⌘\\',
     phase: 3,
