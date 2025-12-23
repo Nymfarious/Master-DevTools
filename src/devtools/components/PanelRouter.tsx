@@ -10,8 +10,8 @@ import { APIRegistryPanel } from '@/components/panels/APIRegistryPanel';
 import { PipelinePanel } from '@/components/panels/PipelinePanel';
 import { SecurityPanel } from '@/components/panels/SecurityPanel';
 import { DataTestPanel } from '@/components/panels/DataTestPanel';
-import { UITokensPanel } from '@/components/panels/UITokensPanel';
 import { LibrariesPanel } from '@/components/panels/LibrariesPanel';
+import { AppStyleGuidePanel } from '@/components/panels/AppStyleGuidePanel';
 import { ContentPanel } from '@/components/panels/ContentPanel';
 import { AudioPanel } from '@/components/panels/AudioPanel';
 import { FlowchartPanel } from '@/components/panels/FlowchartPanel';
@@ -27,7 +27,6 @@ import { SettingsPanel } from './SettingsPanel';
 
 // Phase 10 panels
 import { ShortcutsPanel } from './ShortcutsPanel';
-import { StyleGuidePanel } from './StyleGuidePanel';
 import { PanelGeneratorPanel } from './PanelGeneratorPanel';
 import { ExportPanel } from './ExportPanel';
 
@@ -47,7 +46,7 @@ const panelComponents: Record<SectionId, React.ComponentType> = {
   pipeline: PipelinePanel,
   security: SecurityEventsPanel, // Enhanced security events
   data: DataTestPanel,
-  tokens: UITokensPanel,
+  tokens: AppStyleGuidePanel, // Redirect to combined panel
   libraries: LibrariesPanel,
   content: ContentPanel,
   audio: AudioPanel,
@@ -56,7 +55,7 @@ const panelComponents: Record<SectionId, React.ComponentType> = {
   video: AnimationPanel,
   // Phase 10 panels
   shortcuts: ShortcutsPanel,
-  styleguide: StyleGuidePanel,
+  styleguide: AppStyleGuidePanel,
   generator: PanelGeneratorPanel,
   export: ExportPanel,
   settings: SettingsPanel,

@@ -1,4 +1,4 @@
-// Libraries Panel - Dependency tracking
+// Packages Panel - Dependency tracking
 // Lines: ~220 | Status: GREEN
 import { useState } from 'react';
 import { 
@@ -14,48 +14,193 @@ interface Library {
   name: string;
   version: string;
   description: string;
+  laymanDescription: string;
   category: string;
   latestVersion?: string;
   hasUpdate?: boolean;
 }
 
-// Static library data from package.json
+// Static library data from package.json with layman descriptions
 const LIBRARIES: Library[] = [
   // Core Framework
-  { name: 'react', version: '18.3.1', description: 'UI framework', category: 'Core Framework' },
-  { name: 'react-dom', version: '18.3.1', description: 'React DOM renderer', category: 'Core Framework' },
-  { name: 'react-router-dom', version: '6.30.1', description: 'Client-side routing', category: 'Core Framework' },
+  { 
+    name: 'react', 
+    version: '18.3.1', 
+    description: 'UI framework', 
+    laymanDescription: 'The core engine that powers your app\'s user interface',
+    category: 'Core Framework' 
+  },
+  { 
+    name: 'react-dom', 
+    version: '18.3.1', 
+    description: 'React DOM renderer', 
+    laymanDescription: 'Connects React to the browser so you can see your app',
+    category: 'Core Framework' 
+  },
+  { 
+    name: 'react-router-dom', 
+    version: '6.30.1', 
+    description: 'Client-side routing', 
+    laymanDescription: 'Handles page navigation without full page reloads',
+    category: 'Core Framework' 
+  },
   
   // UI & Styling
-  { name: 'tailwindcss-animate', version: '1.0.7', description: 'Tailwind animation utilities', category: 'UI & Styling' },
-  { name: 'lucide-react', version: '0.462.0', description: 'Icon library', category: 'UI & Styling' },
-  { name: 'clsx', version: '2.1.1', description: 'Class name utility', category: 'UI & Styling' },
-  { name: 'tailwind-merge', version: '2.6.0', description: 'Tailwind class merging', category: 'UI & Styling' },
-  { name: 'class-variance-authority', version: '0.7.1', description: 'Variant management', category: 'UI & Styling' },
+  { 
+    name: 'tailwindcss-animate', 
+    version: '1.0.7', 
+    description: 'Tailwind animation utilities', 
+    laymanDescription: 'Adds smooth animations and transitions to elements',
+    category: 'UI & Styling' 
+  },
+  { 
+    name: 'lucide-react', 
+    version: '0.462.0', 
+    description: 'Icon library', 
+    laymanDescription: 'Provides the icons you see throughout the app',
+    category: 'UI & Styling' 
+  },
+  { 
+    name: 'clsx', 
+    version: '2.1.1', 
+    description: 'Class name utility', 
+    laymanDescription: 'Helps combine CSS classes conditionally',
+    category: 'UI & Styling' 
+  },
+  { 
+    name: 'tailwind-merge', 
+    version: '2.6.0', 
+    description: 'Tailwind class merging', 
+    laymanDescription: 'Prevents conflicting styles from overlapping',
+    category: 'UI & Styling' 
+  },
+  { 
+    name: 'class-variance-authority', 
+    version: '0.7.1', 
+    description: 'Variant management', 
+    laymanDescription: 'Creates consistent button and component styles',
+    category: 'UI & Styling' 
+  },
   
   // State & Data
-  { name: 'zustand', version: '5.0.9', description: 'State management', category: 'State & Data' },
-  { name: '@supabase/supabase-js', version: '2.89.0', description: 'Database client', category: 'State & Data' },
-  { name: '@tanstack/react-query', version: '5.83.0', description: 'Server state management', category: 'State & Data' },
+  { 
+    name: 'zustand', 
+    version: '5.0.9', 
+    description: 'State management', 
+    laymanDescription: 'Stores and shares data across your app\'s components',
+    category: 'State & Data' 
+  },
+  { 
+    name: '@supabase/supabase-js', 
+    version: '2.89.0', 
+    description: 'Database client', 
+    laymanDescription: 'Connects your app to the cloud database',
+    category: 'State & Data' 
+  },
+  { 
+    name: '@tanstack/react-query', 
+    version: '5.83.0', 
+    description: 'Server state management', 
+    laymanDescription: 'Fetches, caches, and syncs server data automatically',
+    category: 'State & Data' 
+  },
   
   // Forms & Validation
-  { name: 'react-hook-form', version: '7.61.1', description: 'Form handling', category: 'Forms & Validation' },
-  { name: '@hookform/resolvers', version: '3.10.0', description: 'Form validation resolvers', category: 'Forms & Validation' },
-  { name: 'zod', version: '3.25.76', description: 'Schema validation', category: 'Forms & Validation' },
+  { 
+    name: 'react-hook-form', 
+    version: '7.61.1', 
+    description: 'Form handling', 
+    laymanDescription: 'Makes building forms easy with validation built-in',
+    category: 'Forms & Validation' 
+  },
+  { 
+    name: '@hookform/resolvers', 
+    version: '3.10.0', 
+    description: 'Form validation resolvers', 
+    laymanDescription: 'Connects form validation to schema definitions',
+    category: 'Forms & Validation' 
+  },
+  { 
+    name: 'zod', 
+    version: '3.25.76', 
+    description: 'Schema validation', 
+    laymanDescription: 'Ensures data matches expected formats before processing',
+    category: 'Forms & Validation' 
+  },
   
   // UI Components
-  { name: 'sonner', version: '1.7.4', description: 'Toast notifications', category: 'UI Components' },
-  { name: 'vaul', version: '0.9.9', description: 'Drawer component', category: 'UI Components' },
-  { name: 'cmdk', version: '1.1.1', description: 'Command menu', category: 'UI Components' },
-  { name: 'embla-carousel-react', version: '8.6.0', description: 'Carousel component', category: 'UI Components' },
-  { name: 'recharts', version: '2.15.4', description: 'Chart library', category: 'UI Components' },
-  { name: 'react-day-picker', version: '8.10.1', description: 'Date picker', category: 'UI Components' },
-  { name: 'react-resizable-panels', version: '2.1.9', description: 'Resizable panels', category: 'UI Components' },
-  { name: 'input-otp', version: '1.4.2', description: 'OTP input', category: 'UI Components' },
+  { 
+    name: 'sonner', 
+    version: '1.7.4', 
+    description: 'Toast notifications', 
+    laymanDescription: 'Shows pop-up messages to notify users of events',
+    category: 'UI Components' 
+  },
+  { 
+    name: 'vaul', 
+    version: '0.9.9', 
+    description: 'Drawer component', 
+    laymanDescription: 'Creates slide-out panels from screen edges',
+    category: 'UI Components' 
+  },
+  { 
+    name: 'cmdk', 
+    version: '1.1.1', 
+    description: 'Command menu', 
+    laymanDescription: 'Powers the keyboard-driven command palette',
+    category: 'UI Components' 
+  },
+  { 
+    name: 'embla-carousel-react', 
+    version: '8.6.0', 
+    description: 'Carousel component', 
+    laymanDescription: 'Creates swipeable image and content sliders',
+    category: 'UI Components' 
+  },
+  { 
+    name: 'recharts', 
+    version: '2.15.4', 
+    description: 'Chart library', 
+    laymanDescription: 'Creates beautiful graphs and data visualizations',
+    category: 'UI Components' 
+  },
+  { 
+    name: 'react-day-picker', 
+    version: '8.10.1', 
+    description: 'Date picker', 
+    laymanDescription: 'Provides calendar widgets for selecting dates',
+    category: 'UI Components' 
+  },
+  { 
+    name: 'react-resizable-panels', 
+    version: '2.1.9', 
+    description: 'Resizable panels', 
+    laymanDescription: 'Creates adjustable split-view layouts',
+    category: 'UI Components' 
+  },
+  { 
+    name: 'input-otp', 
+    version: '1.4.2', 
+    description: 'OTP input', 
+    laymanDescription: 'Handles one-time password input fields',
+    category: 'UI Components' 
+  },
   
   // Utilities
-  { name: 'date-fns', version: '3.6.0', description: 'Date utilities', category: 'Utilities' },
-  { name: 'next-themes', version: '0.3.0', description: 'Theme management', category: 'Utilities' },
+  { 
+    name: 'date-fns', 
+    version: '3.6.0', 
+    description: 'Date utilities', 
+    laymanDescription: 'Formats and manipulates dates and times easily',
+    category: 'Utilities' 
+  },
+  { 
+    name: 'next-themes', 
+    version: '0.3.0', 
+    description: 'Theme management', 
+    laymanDescription: 'Handles dark mode and theme switching',
+    category: 'Utilities' 
+  },
 ];
 
 // Add update status
@@ -82,7 +227,8 @@ export function LibrariesPanel() {
 
   const filteredLibraries = librariesWithUpdates.filter(lib =>
     lib.name.toLowerCase().includes(search.toLowerCase()) ||
-    lib.description.toLowerCase().includes(search.toLowerCase())
+    lib.description.toLowerCase().includes(search.toLowerCase()) ||
+    lib.laymanDescription.toLowerCase().includes(search.toLowerCase())
   );
 
   const librariesByCategory = CATEGORIES.reduce((acc, cat) => {
@@ -100,10 +246,10 @@ export function LibrariesPanel() {
         <div>
           <h1 className="text-lg font-display font-semibold text-foreground flex items-center gap-2">
             <Package className="w-5 h-5 text-signal-amber" />
-            Libraries
+            Packages
           </h1>
           <p className="text-sm text-muted-foreground">
-            Project dependencies and versions
+            Project dependencies and what they do
           </p>
         </div>
         <Button variant="outline" size="sm" className="h-8 gap-1.5">
@@ -160,22 +306,23 @@ export function LibrariesPanel() {
                     <div 
                       key={lib.name}
                       className={cn(
-                        "px-4 py-2 flex items-center justify-between",
+                        "px-4 py-3 flex items-start justify-between",
                         i < libs.length - 1 && "border-b border-border/30"
                       )}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-1 h-8 rounded-full bg-signal-green/50" />
+                      <div className="flex items-start gap-3">
+                        <div className="w-1 h-10 rounded-full bg-signal-green/50 mt-0.5" />
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-mono text-sm text-foreground">{lib.name}</span>
                             <span className="text-xs text-muted-foreground">{lib.version}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground">{lib.description}</p>
+                          <p className="text-sm text-foreground/80 mt-0.5">{lib.laymanDescription}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{lib.description}</p>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         {lib.hasUpdate ? (
                           <Badge className="bg-signal-amber/20 text-signal-amber border-signal-amber/30 text-[10px] gap-1">
                             <AlertTriangle className="w-3 h-3" />

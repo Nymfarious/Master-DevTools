@@ -99,11 +99,11 @@ export const TESTING_SECTIONS: DevToolsSection[] = [
 export const REFERENCE_SECTIONS: DevToolsSection[] = [
   {
     id: 'styleguide',
-    label: 'Style Guide',
+    label: 'App Style Guide',
     icon: Palette,
-    description: 'Design tokens and patterns',
+    description: 'Colors, typography, and component patterns',
     shortcut: '⌘8',
-    phase: 10,
+    phase: 3,
   },
   {
     id: 'shortcuts',
@@ -115,19 +115,11 @@ export const REFERENCE_SECTIONS: DevToolsSection[] = [
   },
   {
     id: 'libraries',
-    label: 'Libraries',
+    label: 'Packages',
     icon: Package,
-    description: 'Dependencies and versions',
+    description: 'Dependencies and what they do',
     shortcut: '⌘9',
     phase: 4,
-  },
-  {
-    id: 'tokens',
-    label: 'UI Tokens',
-    icon: Palette,
-    description: 'Colors and typography',
-    shortcut: '⌘0',
-    phase: 3,
   },
   {
     id: 'flowchart',
