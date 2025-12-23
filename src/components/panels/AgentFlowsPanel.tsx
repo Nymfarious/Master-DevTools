@@ -793,117 +793,37 @@ export function AgentFlowsPanel() {
           </TabsContent>
 
           {/* Registered Agents Tab */}
-          <TabsContent value="agents" className="flex-1 mt-0 h-full">
-            <ResizablePanelGroup direction="vertical" className="h-full min-h-[400px]">
-              <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
-                <div className="h-full flex flex-col">
-                  <div className="section-header flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Bot className="w-3 h-3" />
-                      <span>Registered Agents</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
-                      <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'name' | 'status' | 'provider')}>
-                        <SelectTrigger className="h-6 w-24 text-[10px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="name" className="text-xs">Name</SelectItem>
-                          <SelectItem value="status" className="text-xs">Status</SelectItem>
-                          <SelectItem value="provider" className="text-xs">Provider</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <ScrollArea className="flex-1">
-                    <div className="space-y-2 pr-3 pb-2">
-                      {sortedAgents.map(agent => (
-                        <AgentCard key={agent.id} agent={agent} onTest={() => handleTestAgent(agent.id)} />
-                      ))}
-                    </div>
-                  </ScrollArea>
+          <TabsContent value="agents" className="flex-1 mt-0 h-full overflow-hidden">
+            <div className="h-full flex flex-col">
+              <div className="section-header flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Bot className="w-3 h-3" />
+                  <span>Registered Agents</span>
+                  <Badge variant="outline" className="text-[10px]">{sortedAgents.length}</Badge>
                 </div>
-              </ResizablePanel>
-
-              <ResizableHandle withHandle className="bg-border/50 hover:bg-primary/20 transition-colors">
-                <div className="flex items-center justify-center h-full">
-                  <GripHorizontal className="w-4 h-4 text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
+                  <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'name' | 'status' | 'provider')}>
+                    <SelectTrigger className="h-6 w-24 text-[10px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="name" className="text-xs">Name</SelectItem>
+                      <SelectItem value="status" className="text-xs">Status</SelectItem>
+                      <SelectItem value="provider" className="text-xs">Provider</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </ResizableHandle>
-
-              <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
-                <div className="h-full flex flex-col p-2">
-                  <div className="dev-card flex-1 flex flex-col">
-                    <div className="section-header">
-                      <Sparkles className="w-3 h-3" />
-                      <span>Prompt Console</span>
-                    </div>
-                    <div className="flex-1 flex flex-col space-y-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground font-mono">Agent:</span>
-                        <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-                          <SelectTrigger className="w-[200px] h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {registeredAgents.filter(a => a.status === 'online').map(a => (
-                              <SelectItem key={a.id} value={a.id} className="text-xs">{a.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <Textarea
-                        placeholder="Enter your prompt..."
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        className="flex-1 min-h-[80px] text-sm font-mono bg-background resize-none"
-                      />
-
-                      <div className="flex items-center justify-between">
-                        <Button onClick={sendPrompt} disabled={isLoading || !prompt.trim()} size="sm" className="gap-2">
-                          {isLoading ? (
-                            <>
-                              <Timer className="w-3 h-3 animate-spin" />
-                              Processing...
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-3 h-3" />
-                              Send Prompt
-                            </>
-                          )}
-                        </Button>
-                        <span className="text-xs text-muted-foreground font-mono">
-                          <Clock className="w-3 h-3 inline mr-1" />
-                          Est: ~{((registeredAgents.find(a => a.id === selectedAgent)?.avgResponseTime || 0) / 1000).toFixed(1)}s
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {response && (
-                    <div className="dev-card mt-2">
-                      <div className="section-header">
-                        <CheckCircle className="w-3 h-3 text-signal-green" />
-                        <span>Response</span>
-                        <span className="ml-auto text-signal-green text-[10px]">Completed in {duration}ms</span>
-                      </div>
-                      <pre className="bg-background p-3 rounded text-xs font-mono text-signal-cyan overflow-x-auto max-h-32">
-                        {JSON.stringify(response, null, 2)}
-                      </pre>
-                      <div className="flex gap-2 mt-3">
-                        <Button variant="outline" size="sm" className="text-xs gap-1" onClick={copyResponse}>
-                          <Copy className="w-3 h-3" />
-                          Copy Response
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+              </div>
+              <ScrollArea className="flex-1 [&_[data-radix-scroll-area-scrollbar]]:bg-muted/30 [&_[data-radix-scroll-area-thumb]]:bg-muted-foreground/40">
+                <div className="space-y-2 pr-4 pb-4">
+                  {sortedAgents.map(agent => (
+                    <AgentCard key={agent.id} agent={agent} onTest={() => handleTestAgent(agent.id)} />
+                  ))}
                 </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
+              </ScrollArea>
+            </div>
+
           </TabsContent>
         </Tabs>
 
