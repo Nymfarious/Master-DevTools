@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useLogsStore } from '@/stores/logsStore';
 import { usePipelineStore } from '@/stores/pipelineStore';
 import { 
-  Bot, Send, Copy, Clock, CheckCircle, XCircle, Timer, Sparkles
+  Bot, Send, Copy, Clock, CheckCircle, Timer, Sparkles, ArrowUpDown, GripHorizontal
 } from 'lucide-react';
 import {
   Select,
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES & DATA
@@ -129,8 +130,21 @@ export function AgentsPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<Record<string, unknown> | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'status' | 'provider'>('name');
   const { addLog } = useLogsStore();
   const { addEvent } = usePipelineStore();
+
+  const sortedAgents = useMemo(() => {
+    return [...agents].sort((a, b) => {
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      if (sortBy === 'status') {
+        const statusOrder = { online: 0, planned: 1, offline: 2, error: 3 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      }
+      if (sortBy === 'provider') return a.provider.localeCompare(b.provider);
+      return 0;
+    });
+  }, [sortBy]);
 
   const sendPrompt = async () => {
     const agent = agents.find(a => a.id === selectedAgent);
@@ -197,102 +211,132 @@ export function AgentsPanel() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Registered Agents */}
-      <div>
-        <div className="section-header">
-          <Bot className="w-3 h-3" />
-          <span>Registered Agents</span>
-        </div>
-        <ScrollArea className="h-[220px]">
-          <div className="space-y-2 pr-3">
-            {agents.map(agent => (
-              <AgentCard 
-                key={agent.id} 
-                agent={agent} 
-                onTest={() => handleTestAgent(agent.id)} 
-              />
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
-
-      {/* Prompt Console */}
-      <div className="dev-card">
-        <div className="section-header">
-          <Sparkles className="w-3 h-3" />
-          <span>Prompt Console</span>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground font-mono">Agent:</span>
-            <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-              <SelectTrigger className="w-[200px] h-8 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {agents.filter(a => a.status === 'online').map(a => (
-                  <SelectItem key={a.id} value={a.id} className="text-xs">{a.name}</SelectItem>
+    <div className="h-full flex flex-col">
+      <ResizablePanelGroup direction="vertical" className="flex-1">
+        {/* Registered Agents - Upper Section */}
+        <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
+          <div className="h-full flex flex-col">
+            <div className="section-header flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bot className="w-3 h-3" />
+                <span>Registered Agents</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'name' | 'status' | 'provider')}>
+                  <SelectTrigger className="h-6 w-24 text-[10px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name" className="text-xs">Name</SelectItem>
+                    <SelectItem value="status" className="text-xs">Status</SelectItem>
+                    <SelectItem value="provider" className="text-xs">Provider</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <ScrollArea className="flex-1">
+              <div className="space-y-2 pr-3 pb-2">
+                {sortedAgents.map(agent => (
+                  <AgentCard 
+                    key={agent.id} 
+                    agent={agent} 
+                    onTest={() => handleTestAgent(agent.id)} 
+                  />
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            </ScrollArea>
           </div>
+        </ResizablePanel>
 
-          <Textarea
-            placeholder="Enter your prompt..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="min-h-[80px] text-sm font-mono bg-background"
-          />
+        {/* Draggable Handle */}
+        <ResizableHandle withHandle className="bg-border/50 hover:bg-primary/20 transition-colors">
+          <div className="flex items-center justify-center h-full">
+            <GripHorizontal className="w-4 h-4 text-muted-foreground" />
+          </div>
+        </ResizableHandle>
 
-          <div className="flex items-center justify-between">
-            <Button 
-              onClick={sendPrompt} 
-              disabled={isLoading || !prompt.trim()}
-              size="sm"
-              className="gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <Timer className="w-3 h-3 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Send className="w-3 h-3" />
-                  Send Prompt
-                </>
-              )}
-            </Button>
-            <span className="text-xs text-muted-foreground font-mono">
-              <Clock className="w-3 h-3 inline mr-1" />
-              Est: ~{((agents.find(a => a.id === selectedAgent)?.avgResponseTime || 0) / 1000).toFixed(1)}s
-            </span>
-          </div>
-        </div>
-      </div>
+        {/* Prompt Console - Lower Section */}
+        <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
+          <div className="h-full flex flex-col p-2">
+            <div className="dev-card flex-1 flex flex-col">
+              <div className="section-header">
+                <Sparkles className="w-3 h-3" />
+                <span>Prompt Console</span>
+              </div>
+              <div className="flex-1 flex flex-col space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground font-mono">Agent:</span>
+                  <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+                    <SelectTrigger className="w-[200px] h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agents.filter(a => a.status === 'online').map(a => (
+                        <SelectItem key={a.id} value={a.id} className="text-xs">{a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-      {/* Response */}
-      {response && (
-        <div className="dev-card">
-          <div className="section-header">
-            <CheckCircle className="w-3 h-3 text-signal-green" />
-            <span>Response</span>
-            <span className="ml-auto text-signal-green text-[10px]">
-              Completed in {duration}ms
-            </span>
+                <Textarea
+                  placeholder="Enter your prompt..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="flex-1 min-h-[80px] text-sm font-mono bg-background resize-none"
+                />
+
+                <div className="flex items-center justify-between">
+                  <Button 
+                    onClick={sendPrompt} 
+                    disabled={isLoading || !prompt.trim()}
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Timer className="w-3 h-3 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3 h-3" />
+                        Send Prompt
+                      </>
+                    )}
+                  </Button>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    <Clock className="w-3 h-3 inline mr-1" />
+                    Est: ~{((agents.find(a => a.id === selectedAgent)?.avgResponseTime || 0) / 1000).toFixed(1)}s
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Response */}
+            {response && (
+              <div className="dev-card mt-2">
+                <div className="section-header">
+                  <CheckCircle className="w-3 h-3 text-signal-green" />
+                  <span>Response</span>
+                  <span className="ml-auto text-signal-green text-[10px]">
+                    Completed in {duration}ms
+                  </span>
+                </div>
+                <pre className="bg-background p-3 rounded text-xs font-mono text-signal-cyan overflow-x-auto max-h-32">
+                  {JSON.stringify(response, null, 2)}
+                </pre>
+                <div className="flex gap-2 mt-3">
+                  <Button variant="outline" size="sm" className="text-xs gap-1" onClick={copyResponse}>
+                    <Copy className="w-3 h-3" />
+                    Copy Response
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
-          <pre className="bg-background p-3 rounded text-xs font-mono text-signal-cyan overflow-x-auto">
-            {JSON.stringify(response, null, 2)}
-          </pre>
-          <div className="flex gap-2 mt-3">
-            <Button variant="outline" size="sm" className="text-xs gap-1" onClick={copyResponse}>
-              <Copy className="w-3 h-3" />
-              Copy Response
-            </Button>
-          </div>
-        </div>
-      )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
