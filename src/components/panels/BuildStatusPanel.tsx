@@ -1,6 +1,6 @@
 // Build Status Panel - Track feature completion, notes, and dependencies
 import { useState, useMemo } from 'react';
-import { Check, Trash2, Plus, Circle, CheckCircle2, Clock, AlertCircle, Layers } from 'lucide-react';
+import { Check, Trash2, Plus, Minus, Circle, CheckCircle2, Clock, AlertCircle, Layers, ChevronDown, MoreVertical } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useBuildStatusStore } from '@/stores/buildStatusStore';
+import { useSettingsStore, type ExpandIconStyle } from '@/devtools/stores/settingsStore';
 import { 
   BuildFeature,
   FeatureStatus, 
@@ -19,6 +20,25 @@ import {
   DEPENDENCY_STATUS_STYLES 
 } from '@/types/buildStatus';
 import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+function ExpandIcon({ style, isOpen }: { style: ExpandIconStyle; isOpen: boolean }) {
+  const iconClass = cn(
+    'h-4 w-4 transition-transform duration-200',
+    isOpen && style === 'chevron' && 'rotate-180',
+    isOpen && style === 'dots' && 'rotate-90'
+  );
+
+  switch (style) {
+    case 'plusminus':
+      return isOpen ? <Minus className={iconClass} /> : <Plus className={iconClass} />;
+    case 'dots':
+      return <MoreVertical className={iconClass} />;
+    case 'chevron':
+    default:
+      return <ChevronDown className={iconClass} />;
+  }
+}
 
 const STATUS_ORDER: FeatureStatus[] = ['complete', 'partial', 'stub', 'bug', 'planned'];
 
@@ -32,6 +52,8 @@ export function BuildStatusPanel() {
     toggleNoteResolved,
     deleteNote,
   } = useBuildStatusStore();
+  
+  const { settings } = useSettingsStore();
 
   const [newNote, setNewNote] = useState('');
   const [newPriority, setNewPriority] = useState<Priority>('P2');
@@ -116,7 +138,10 @@ export function BuildStatusPanel() {
                   onOpenChange={(open) => setOpenCategories(prev => ({ ...prev, [category]: open }))}
                 >
                   <CollapsibleTrigger className="flex items-center justify-between w-full p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <span className="font-medium">{category}</span>
+                    <div className="flex items-center gap-2">
+                      <ExpandIcon style={settings.expandIconStyle} isOpen={openCategories[category]} />
+                      <span className="font-medium">{category}</span>
+                    </div>
                     <Badge variant="secondary" className="text-xs">
                       {getCategoryCompletion(categoryFeatures)} complete
                     </Badge>

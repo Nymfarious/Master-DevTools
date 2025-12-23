@@ -1,16 +1,39 @@
 // Settings Panel v3.2.0 - DevTools configuration with error interception toggle and state reset
-import { Settings, RefreshCw, Eye, Activity, Beaker, Bot, Code, Upload, ChevronDown, Plus, MoreHorizontal, Zap, Palette, Keyboard, Info, ShieldOff, Unplug, Bug, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Settings, RefreshCw, Eye, Activity, Beaker, Bot, Code, Upload, ChevronDown, Plus, MoreHorizontal, Zap, Palette, Keyboard, Info, ShieldOff, Unplug, Bug, Trash2, Pin, X, Minus, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useSettingsStore, type ExpandIconStyle } from '../stores/settingsStore';
+import { useSettingsStore, type ExpandIconStyle, type UserRole } from '../stores/settingsStore';
 import { RoleSwitcher } from './RoleSwitcher';
 import { BlockSignupsToggle } from './BlockSignupsToggle';
 import { GuestModeToggle } from './GuestModeToggle';
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 interface SettingRowProps {
   icon: React.ElementType;
@@ -54,27 +77,55 @@ const expandIconOptions: { value: ExpandIconStyle; label: string; icon: React.El
   { value: 'dots', label: 'Dots', icon: MoreHorizontal },
 ];
 
-export function SettingsPanel() {
-  const { settings, updateSettings, resetSettings } = useSettingsStore();
+// Quick access sections that can be pinned
+const PINNABLE_SECTIONS = [
+  { id: 'role', label: 'Current Role', icon: Bot },
+  { id: 'connections', label: 'Connection Control', icon: Unplug },
+  { id: 'appearance', label: 'Appearance', icon: Palette },
+  { id: 'resource', label: 'Resource Mode', icon: Zap },
+  { id: 'developer', label: 'Developer Options', icon: Code },
+  { id: 'features', label: 'Features', icon: Activity },
+];
 
-  return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-display font-semibold text-foreground flex items-center gap-2">
-            <Settings className="w-5 h-5 text-muted-foreground" />
-            Settings
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            DevTools configuration
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={resetSettings}>
-          <RefreshCw className="w-3 h-3 mr-1" />
-          Reset
-        </Button>
-      </div>
+export function SettingsPanel() {
+  const { settings, updateSettings, resetSettings, setRole } = useSettingsStore();
+  const [pinnedSections, setPinnedSections] = useState<string[]>([]);
+  const [roleCollapsed, setRoleCollapsed] = useState(true);
+
+  const togglePin = (sectionId: string) => {
+    setPinnedSections(prev => 
+      prev.includes(sectionId) 
+        ? prev.filter(id => id !== sectionId)
+        : [...prev, sectionId]
+    );
+  };
+
+  const handleReset = () => {
+    resetSettings();
+    toast.success('Settings reset to defaults');
+  };
+
+  const handleClearState = () => {
+    const devtoolsKeys = [
+      'devtools-settings',
+      'devtools-state',
+      'devtools-app-state',
+      'master-devtools-errors',
+      'master-devtools-build-status',
+    ];
+    devtoolsKeys.forEach(key => localStorage.removeItem(key));
+    toast.success('DevTools state cleared', {
+      description: 'Reloading page to apply changes...',
+    });
+    setTimeout(() => window.location.reload(), 500);
+  };
+
+  const roleOptions: { value: UserRole; label: string }[] = [
+    { value: 'user', label: 'User' },
+    { value: 'admin', label: 'Admin' },
+    { value: 'developer', label: 'Developer' },
+    { value: 'tester', label: 'Tester' },
+  ];
 
       <ScrollArea className="h-[calc(100vh-280px)]">
         <div className="space-y-4 pr-4">
@@ -90,8 +141,25 @@ export function SettingsPanel() {
             </div>
           </section>
 
-          {/* Connection Control - NEW in v3.0.0 */}
-          <CollapsibleSection title="Connection Control" icon={Unplug} defaultOpen>
+          <CollapsibleSection id="section-connections" title="Connection Control" icon={Unplug}>
+            <div className="flex items-center justify-between mb-2">
+              <span />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("h-6 w-6 p-0", pinnedSections.includes('connections') && "text-signal-amber")}
+                    onClick={() => togglePin('connections')}
+                  >
+                    <Pin className="w-3 h-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p className="text-xs">{pinnedSections.includes('connections') ? 'Unpin' : 'Pin to quick access'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="space-y-3">
               <SettingRow
                 icon={Unplug}
@@ -121,8 +189,8 @@ export function SettingsPanel() {
             </div>
           </CollapsibleSection>
 
-          {/* Appearance */}
-          <CollapsibleSection title="Appearance" icon={Palette} defaultOpen>
+          <CollapsibleSection id="section-appearance" title="Appearance" icon={Palette}>
+            <div className="space-y-3">
             <div className="space-y-3">
               <SettingRow
                 icon={Eye}
@@ -171,8 +239,8 @@ export function SettingsPanel() {
             </div>
           </CollapsibleSection>
 
-          {/* Resource Mode */}
-          <CollapsibleSection title="Resource Mode" icon={Zap} defaultOpen>
+          <CollapsibleSection id="section-resource" title="Resource Mode" icon={Zap}>
+            <div className="space-y-3">
             <div className="space-y-3">
               <SettingRow
                 icon={Zap}
@@ -205,8 +273,8 @@ export function SettingsPanel() {
             </div>
           </CollapsibleSection>
 
-          {/* Developer Options */}
-          <CollapsibleSection title="Developer Options" icon={Code} defaultOpen>
+          <CollapsibleSection id="section-developer" title="Developer Options" icon={Code}>
+            <div className="space-y-3">
             <div className="space-y-3">
               <GuestModeToggle />
               <BlockSignupsToggle />
@@ -237,8 +305,8 @@ export function SettingsPanel() {
             </div>
           </CollapsibleSection>
 
-          {/* Features */}
-          <CollapsibleSection title="Features" icon={Activity}>
+          <CollapsibleSection id="section-features" title="Features" icon={Activity}>
+            <div className="space-y-3">
             <div className="space-y-3">
               <SettingRow
                 icon={Activity}
@@ -312,41 +380,72 @@ export function SettingsPanel() {
 
           {/* Reset Buttons */}
           <div className="space-y-2">
-            <Button 
-              variant="outline" 
-              className="w-full border-signal-red/50 text-signal-red hover:bg-signal-red/10"
-              onClick={resetSettings}
-            >
-              <RefreshCw className="w-3 h-3 mr-2" />
-              Reset All Settings
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full border-signal-red/50 text-signal-red hover:bg-signal-red/10"
+                >
+                  <RefreshCw className="w-3 h-3 mr-2" />
+                  Reset All Settings
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <div className="flex items-center justify-between">
+                    <AlertDialogTitle>Reset All Settings?</AlertDialogTitle>
+                    <AlertDialogCancel className="h-6 w-6 p-0 border-0">
+                      <X className="w-4 h-4" />
+                    </AlertDialogCancel>
+                  </div>
+                  <AlertDialogDescription>
+                    This will reset all settings to their default values. Your pinned sections and other preferences will be cleared.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReset} className="bg-signal-red hover:bg-signal-red/80">
+                    Reset
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             
-            <Button 
-              variant="outline" 
-              className="w-full border-destructive/50 text-destructive hover:bg-destructive/10"
-              onClick={() => {
-                // All persisted devtools store keys
-                const devtoolsKeys = [
-                  'devtools-settings',
-                  'devtools-state',
-                  'devtools-app-state',
-                  'master-devtools-errors',
-                  'master-devtools-build-status',
-                ];
-                devtoolsKeys.forEach(key => localStorage.removeItem(key));
-                toast.success('DevTools state cleared', {
-                  description: 'Reloading page to apply changes...',
-                });
-                setTimeout(() => window.location.reload(), 500);
-              }}
-            >
-              <Trash2 className="w-3 h-3 mr-2" />
-              Clear Persisted DevTools State
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full border-destructive/50 text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="w-3 h-3 mr-2" />
+                  Clear Persisted DevTools State
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <div className="flex items-center justify-between">
+                    <AlertDialogTitle>Clear All Persisted State?</AlertDialogTitle>
+                    <AlertDialogCancel className="h-6 w-6 p-0 border-0">
+                      <X className="w-4 h-4" />
+                    </AlertDialogCancel>
+                  </div>
+                  <AlertDialogDescription>
+                    This will clear all DevTools state from local storage including settings, errors, and build status. The page will reload after clearing.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearState} className="bg-destructive hover:bg-destructive/80">
+                    Clear State
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
         </div>
       </ScrollArea>
     </div>
+    </TooltipProvider>
   );
 }

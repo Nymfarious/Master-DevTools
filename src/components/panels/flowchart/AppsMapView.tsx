@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { 
   CheckCircle2, Clock, Pause, CalendarClock, 
-  ExternalLink, ArrowRight 
+  Rocket, ArrowRight 
 } from 'lucide-react';
 import { ECHOVERSE_APPS, APP_STATUS_STYLES, type AppStatus } from '@/config/apps';
 import { Badge } from '@/components/ui/badge';
@@ -131,8 +131,8 @@ export function AppsMapView({ onSelectApp }: AppsMapViewProps) {
                               "bg-terminal-surface/80 hover:bg-terminal-elevated",
                               "flex items-center justify-between gap-3",
                               app.status === 'ready' && "border-signal-green/30",
-                              app.status === 'development' && "border-signal-amber/30 border-dashed",
-                              app.status === 'planned' && "border-signal-blue/30 border-dotted",
+                              app.status === 'development' && "border-signal-amber/30 border-dashed border-2",
+                              app.status === 'planned' && "border-signal-blue/30 border-dotted border-2",
                               app.status === 'offline' && "border-muted-foreground/30 opacity-60"
                             )}
                           >
@@ -151,17 +151,24 @@ export function AppsMapView({ onSelectApp }: AppsMapViewProps) {
                                 {statusStyle.label}
                               </Badge>
                               {app.urls.production && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 w-6 p-0"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(app.urls.production, '_blank');
-                                  }}
-                                >
-                                  <ExternalLink className="w-3 h-3" />
-                                </Button>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        window.open(app.urls.production, '_blank');
+                                      }}
+                                    >
+                                      <Rocket className="w-3 h-3" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    <p className="text-xs">Launch App</p>
+                                  </TooltipContent>
+                                </Tooltip>
                               )}
                             </div>
                           </button>
@@ -209,11 +216,11 @@ export function AppsMapView({ onSelectApp }: AppsMapViewProps) {
               <span className="text-xs text-muted-foreground">Ready</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-8 h-0.5 border-t-2 border-dashed border-signal-amber" />
-              <span className="text-xs text-muted-foreground">In Progress</span>
+              <div className="w-8 border-t-2 border-dashed border-signal-amber" />
+              <span className="text-xs text-signal-amber">In Dev</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-8 h-0.5 border-t-2 border-dotted border-signal-blue" />
+              <div className="w-8 border-t-2 border-dotted border-signal-blue" />
               <span className="text-xs text-muted-foreground">Planned</span>
             </div>
           </div>
