@@ -36,7 +36,7 @@ export function Footer() {
                   <span className="text-muted-foreground">{connectionLabel[connectionStatus]}</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs">
+              <TooltipContent side="top" align="start" sideOffset={8} className="max-w-xs ml-4">
                 <div className="space-y-1">
                   <p className="font-semibold">Lovable Cloud Backend</p>
                   <p className="text-xs text-muted-foreground">
