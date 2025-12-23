@@ -139,11 +139,11 @@ export const REFERENCE_SECTIONS: DevToolsSection[] = [
   },
   {
     id: 'content',
-    label: 'Content',
-    icon: FileJson,
-    description: 'JSON inspector and validation',
+    label: 'Agent Flows',
+    icon: Workflow,
+    description: 'Multi-agent workflow creator',
     shortcut: '⌘\\',
-    phase: 5,
+    phase: 3,
   },
 ];
 

@@ -11,7 +11,7 @@ import { SecurityPanel } from '@/components/panels/SecurityPanel';
 import { DataTestPanel } from '@/components/panels/DataTestPanel';
 import { LibrariesPanel } from '@/components/panels/LibrariesPanel';
 import { AudioPanel } from '@/components/panels/AudioPanel';
-import { ContentPanel } from '@/components/panels/ContentPanel';
+import { AgentFlowsPanel } from '@/components/panels/AgentFlowsPanel';
 import { FlowchartPanel } from '@/components/panels/FlowchartPanel';
 import { AgentsPanel } from '@/components/panels/AgentsPanel';
 import { AnimationPanel } from '@/components/panels/AnimationPanel';
@@ -105,7 +105,7 @@ export default function Dashboard() {
       case 'audio':
         return <AudioPanel />;
       case 'content':
-        return <ContentPanel />;
+        return <AgentFlowsPanel />;
       case 'flowchart':
         return <FlowchartPanel />;
       case 'agents':

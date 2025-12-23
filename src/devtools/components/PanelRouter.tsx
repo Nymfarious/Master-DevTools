@@ -12,7 +12,7 @@ import { SecurityPanel } from '@/components/panels/SecurityPanel';
 import { DataTestPanel } from '@/components/panels/DataTestPanel';
 import { LibrariesPanel } from '@/components/panels/LibrariesPanel';
 import { AppStyleGuidePanel } from '@/components/panels/AppStyleGuidePanel';
-import { ContentPanel } from '@/components/panels/ContentPanel';
+import { AgentFlowsPanel } from '@/components/panels/AgentFlowsPanel';
 import { AudioPanel } from '@/components/panels/AudioPanel';
 import { FlowchartPanel } from '@/components/panels/FlowchartPanel';
 import { AgentsPanel } from '@/components/panels/AgentsPanel';
@@ -48,7 +48,7 @@ const panelComponents: Record<SectionId, React.ComponentType> = {
   data: DataTestPanel,
   tokens: AppStyleGuidePanel, // Redirect to combined panel
   libraries: LibrariesPanel,
-  content: ContentPanel,
+  content: AgentFlowsPanel,
   audio: AudioPanel,
   flowchart: FlowchartPanel,
   agents: AgentsPanel,
