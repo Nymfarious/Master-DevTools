@@ -28,19 +28,11 @@ import type { SectionId, DevToolsSection } from '../types';
 export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
   {
     id: 'overview',
-    label: 'Overview',
-    icon: LayoutDashboard,
-    description: 'System status and quick stats',
-    shortcut: '⌘1',
-    phase: 1,
-  },
-  {
-    id: 'apps',
     label: 'App Launcher',
     icon: Rocket,
-    description: 'Jump to Echoverse apps',
-    shortcut: '⌘2',
-    phase: 2,
+    description: 'Select an app to load its context',
+    shortcut: '⌘1',
+    phase: 1,
   },
   {
     id: 'apis',

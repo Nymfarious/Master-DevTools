@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { AppShell } from '@/components/layout/AppShell';
-import { OverviewPanel } from '@/components/panels/OverviewPanel';
+import { AppLauncherPanel } from '@/components/panels/AppLauncherPanel';
 import { LogsPanel } from '@/components/panels/LogsPanel';
 import { UITokensPanel } from '@/components/panels/UITokensPanel';
 import { PipelinePanel } from '@/components/panels/PipelinePanel';
@@ -60,9 +60,8 @@ export default function Dashboard() {
 
   const renderPanel = () => {
     switch (activeSection) {
-      // MONITORING (Passive)
+      // MONITORING (Passive) - Overview is now App Launcher
       case 'overview':
-        return <OverviewPanel />;
       case 'apps':
         return <AppLauncherPanel />;
       case 'logs':
@@ -136,21 +135,4 @@ export default function Dashboard() {
   };
 
   return <AppShell>{renderPanel()}</AppShell>;
-}
-
-// App Launcher Panel - inline for now
-import { EchoverseApps } from '@/components/overview/EchoverseApps';
-
-function AppLauncherPanel() {
-  return (
-    <div className="space-y-4 boot-sequence">
-      <div>
-        <h1 className="text-lg font-display font-semibold text-foreground">App Launcher</h1>
-        <p className="text-sm text-muted-foreground">
-          Connect to Echoverse applications
-        </p>
-      </div>
-      <EchoverseApps />
-    </div>
-  );
 }

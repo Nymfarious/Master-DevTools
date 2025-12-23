@@ -3,6 +3,7 @@ import { X, Pin, PinOff, PauseCircle, PlayCircle, Eye, EyeOff } from 'lucide-rea
 import { cn } from '@/lib/utils';
 import { useDevToolsStore } from '../stores/devToolsStore';
 import { useSettingsStore } from '../stores/settingsStore';
+import { useAppContextStore } from '@/stores/appContextStore';
 import { IconRail } from './IconRail';
 import { PanelRouter } from './PanelRouter';
 import { QuickAPIStatus } from './QuickAPIStatus';
@@ -20,6 +21,7 @@ interface DevDrawerProps {
 export function DevDrawer({ config }: DevDrawerProps) {
   const { isOpen, isPinned, closeDrawer, togglePin, activeSection, setActiveSection } = useDevToolsStore();
   const { settings, updateSettings } = useSettingsStore();
+  const { loadedApp, clearApp } = useAppContextStore();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   // Handle escape key and shortcuts
@@ -194,9 +196,22 @@ export function DevDrawer({ config }: DevDrawerProps) {
           </div>
         </header>
 
-        {/* Quick API Status Bar */}
-        <div className="px-4 py-2 border-b border-border/20 bg-secondary/30">
+        {/* Quick API Status Bar + Context Indicator */}
+        <div className="px-4 py-2 border-b border-border/20 bg-secondary/30 flex items-center justify-between gap-2">
           <QuickAPIStatus />
+          {loadedApp && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full text-xs shrink-0">
+              <span className="text-muted-foreground">Context:</span>
+              <span className="text-primary font-medium">{loadedApp.name}</span>
+              <button
+                onClick={clearApp}
+                className="p-0.5 hover:bg-primary/20 rounded transition-colors"
+                aria-label="Clear app context"
+              >
+                <X className="h-3 w-3 text-primary" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Main content */}
