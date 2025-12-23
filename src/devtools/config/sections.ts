@@ -93,8 +93,8 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
   {
     id: 'content',
     label: 'Agent Flows',
-    icon: Workflow,
-    description: 'Multi-agent workflow creator',
+    icon: Bot,
+    description: 'Multi-agent workflow creator & AI agent management',
     shortcut: '⌘0',
     phase: 3,
   },
@@ -112,14 +112,6 @@ export const DEVTOOLS_SECTIONS: DevToolsSection[] = [
     icon: Workflow,
     description: 'Visual node graph editor',
     shortcut: '⌘F',
-    phase: 6,
-  },
-  {
-    id: 'agents',
-    label: 'MCP/Agents',
-    icon: Bot,
-    description: 'AI agent management',
-    shortcut: '⌘G',
     phase: 6,
   },
   {
