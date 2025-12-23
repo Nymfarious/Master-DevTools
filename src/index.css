@@ -278,6 +278,11 @@
       linear-gradient(to bottom, hsl(var(--terminal-border) / 0.3) 1px, transparent 1px);
   }
 
+  /* Workflow area grid - subtle overlay for flowchart/sitemap canvases */
+  .workflow-area {
+    background-color: hsl(var(--muted) / 0.08);
+  }
+
   /* Fade edges */
   .fade-edges {
     mask-image: linear-gradient(
