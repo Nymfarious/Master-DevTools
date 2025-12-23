@@ -588,8 +588,8 @@ export function AgentFlowsPanel() {
 
   return (
     <TooltipProvider>
-      <div className="h-full flex flex-col">
-        <Tabs defaultValue="workflow" className="flex-1 flex flex-col">
+      <div className="h-full flex flex-col min-h-0">
+        <Tabs defaultValue="workflow" className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -793,8 +793,8 @@ export function AgentFlowsPanel() {
           </TabsContent>
 
           {/* Registered Agents Tab */}
-          <TabsContent value="agents" className="flex-1 mt-0 h-full overflow-hidden">
-            <div className="h-full flex flex-col">
+          <TabsContent value="agents" className="flex-1 mt-0 overflow-hidden min-h-0 pb-8">
+            <div className="h-full flex flex-col min-h-0">
               <div className="section-header flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <Bot className="w-3 h-3" />
