@@ -98,8 +98,9 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     urls: {
       github: 'https://github.com/Nymfarious/Juniper-Voice-Assistant',
       local: 'http://localhost:5177',
+      production: 'https://nymfarious.github.io/Juniper-Voice-Assistant/',
     },
-    status: 'planned',
+    status: 'ready',
     features: ['Speech recognition', 'TTS', 'Voice commands'],
     apiDependencies: ['elevenlabs', 'web-speech'],
   },
