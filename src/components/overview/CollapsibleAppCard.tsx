@@ -313,6 +313,20 @@ export function CollapsibleAppCard({
                     GitHub
                   </Button>
                 )}
+                {app.urls.production && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs gap-1.5 border-green-500/30 text-green-400 hover:bg-green-500/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpen(app.urls.production!);
+                    }}
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Production
+                  </Button>
+                )}
                 {app.urls.local && (
                   <>
                     <Button
@@ -325,7 +339,7 @@ export function CollapsibleAppCard({
                       }}
                     >
                       <ExternalLink className="w-3 h-3" />
-                      Open Local
+                      Local
                     </Button>
                     <Button
                       size="sm"
@@ -337,7 +351,7 @@ export function CollapsibleAppCard({
                       }}
                     >
                       <Copy className="w-3 h-3" />
-                      Copy URL
+                      Copy
                     </Button>
                   </>
                 )}
