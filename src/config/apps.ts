@@ -1,4 +1,4 @@
-// App Registry v3.2.0 - Echoverse apps configuration
+// App Registry v3.3.0 - Echoverse apps configuration with health & devtools
 import { LucideIcon } from 'lucide-react';
 import { 
   Scissors, Music, Film, Layers, Mic, Video, BookOpen
@@ -6,6 +6,23 @@ import {
 
 export type AppCategory = 'media' | 'audio' | 'creative' | 'utility';
 export type AppStatus = 'ready' | 'development' | 'planned' | 'offline';
+
+// Backend service types this app may depend on
+export type BackendService = 'database' | 'auth' | 'storage' | 'realtime';
+
+// DevTools panel types available for apps
+export type DevToolsPanel = 'logs' | 'audio' | 'video' | 'data' | 'pipeline' | 'content' | 'media';
+
+export interface AppHealthConfig {
+  localPort?: number;
+  healthEndpoint?: string;
+  requiredServices?: BackendService[];
+}
+
+export interface AppDevToolsConfig {
+  panels?: DevToolsPanel[];
+  customPanels?: string[];
+}
 
 export interface EchoverseApp {
   id: string;
@@ -24,6 +41,8 @@ export interface EchoverseApp {
   features?: string[];
   apiDependencies?: string[];
   lastUpdated?: string;
+  healthConfig?: AppHealthConfig;
+  devToolsConfig?: AppDevToolsConfig;
 }
 
 export const ECHOVERSE_APPS: EchoverseApp[] = [
@@ -43,6 +62,13 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     features: ['Grid slicing', 'Freeform select', 'Tag management', 'ZIP export', 'Testing dashboard'],
     apiDependencies: ['supabase'],
     lastUpdated: '2024-12-22',
+    healthConfig: {
+      localPort: 5173,
+      requiredServices: ['database', 'storage'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'data', 'media'],
+    },
   },
   {
     id: 'perfectframe-ai',
@@ -59,6 +85,13 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     features: ['Frame extraction', 'AI analysis', 'Quality grading', 'Batch enhance'],
     apiDependencies: ['gemini'],
     lastUpdated: '2024-12-22',
+    healthConfig: {
+      localPort: 5174,
+      requiredServices: ['storage'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'video', 'pipeline'],
+    },
   },
   {
     id: 'miku-live-layer',
@@ -74,6 +107,13 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     version: '0.1',
     features: ['Image decomposition', 'Expression generation', 'Layer export'],
     apiDependencies: ['supabase', 'gemini'],
+    healthConfig: {
+      localPort: 5175,
+      requiredServices: ['database', 'storage'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'media', 'pipeline'],
+    },
   },
   {
     id: 'ddrummer',
@@ -88,6 +128,13 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     status: 'development',
     features: ['Beat detection', 'Practice modes', 'Metronome'],
     apiDependencies: ['supabase', 'web-audio'],
+    healthConfig: {
+      localPort: 5176,
+      requiredServices: ['database'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'audio', 'data'],
+    },
   },
   {
     id: 'juniper',
@@ -103,6 +150,12 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     status: 'ready',
     features: ['Speech recognition', 'TTS', 'Voice commands'],
     apiDependencies: ['elevenlabs', 'web-speech'],
+    healthConfig: {
+      localPort: 5177,
+    },
+    devToolsConfig: {
+      panels: ['logs', 'audio'],
+    },
   },
   {
     id: 'video-extractor',
@@ -116,6 +169,13 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     },
     status: 'development',
     features: ['Timeline editing', 'Frame export', 'Batch processing'],
+    healthConfig: {
+      localPort: 5178,
+      requiredServices: ['storage'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'video', 'pipeline', 'media'],
+    },
   },
   {
     id: 'storybook-builder',
@@ -130,6 +190,14 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     },
     status: 'development',
     features: ['Story creation', 'Rich text editing', 'Media integration'],
+    apiDependencies: ['supabase'],
+    healthConfig: {
+      localPort: 5179,
+      requiredServices: ['database', 'storage'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'data', 'content', 'media'],
+    },
   },
 ];
 

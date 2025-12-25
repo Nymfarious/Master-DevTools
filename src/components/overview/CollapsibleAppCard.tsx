@@ -2,21 +2,21 @@
 import { useState, useRef } from 'react';
 import {
   ChevronDown,
-  ChevronUp,
   Github,
   ExternalLink,
   Copy,
   Loader2,
   Check,
   Circle,
+  Wrench,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { logEvent } from '@/stores/logsStore';
 import type { EchoverseApp } from '@/config/apps';
 import { APP_STATUS_STYLES, APP_CATEGORIES } from '@/config/apps';
-import { useAPIHealthStore, type APIEndpoint } from '@/stores/apiHealthStore';
+import { AppHealthIndicator } from '@/components/overview/AppHealthIndicator';
+import { AppDevToolsDrawer } from '@/components/devtools/AppDevToolsDrawer';
 import {
   Tooltip,
   TooltipContent,
@@ -69,19 +69,7 @@ export function CollapsibleAppCard({
   const statusStyle = APP_STATUS_STYLES[app.status];
   const categoryStyle = APP_CATEGORIES[app.category];
   const contentRef = useRef<HTMLDivElement>(null);
-  const { endpoints } = useAPIHealthStore();
-
-  // Get API health for this app's dependencies
-  const appApiHealth = (app.apiDependencies || []).map((dep) => {
-    const endpoint = endpoints.find(
-      (e) => e.id.toLowerCase() === dep.toLowerCase()
-    );
-    return {
-      name: dep,
-      status: endpoint?.status || 'unknown',
-      responseTime: endpoint?.responseTime,
-    };
-  });
+  const [devToolsOpen, setDevToolsOpen] = useState(false);
 
   const handleCopyUrl = (url: string) => {
     navigator.clipboard.writeText(url);
@@ -98,6 +86,13 @@ export function CollapsibleAppCard({
       onLoad();
     }
   };
+
+  const handleOpenDevTools = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDevToolsOpen(true);
+  };
+
+  const hasDevTools = app.devToolsConfig?.panels && app.devToolsConfig.panels.length > 0;
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -249,53 +244,8 @@ export function CollapsibleAppCard({
                 </div>
               )}
 
-              {/* API Dependencies with Health Status */}
-              {app.apiDependencies && app.apiDependencies.length > 0 && (
-                <div>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
-                    API Health
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {appApiHealth.map((api) => (
-                      <Tooltip key={api.name}>
-                        <TooltipTrigger asChild>
-                          <span
-                            className={cn(
-                              'badge text-[10px] flex items-center gap-1 cursor-help',
-                              api.status === 'healthy' &&
-                                'bg-green-500/20 text-green-400',
-                              api.status === 'degraded' &&
-                                'bg-yellow-500/20 text-yellow-400',
-                              api.status === 'down' &&
-                                'bg-red-500/20 text-red-400',
-                              api.status === 'unknown' &&
-                                'bg-gray-500/20 text-gray-400'
-                            )}
-                          >
-                            <Circle
-                              className={cn(
-                                'w-1.5 h-1.5 fill-current',
-                                api.status === 'healthy' && 'text-green-400',
-                                api.status === 'degraded' && 'text-yellow-400',
-                                api.status === 'down' && 'text-red-400',
-                                api.status === 'unknown' && 'text-gray-400'
-                              )}
-                            />
-                            {api.name}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="text-xs">
-                          {api.status === 'healthy' && `${api.name} API is healthy`}
-                          {api.status === 'degraded' && `${api.name} API has slow response`}
-                          {api.status === 'down' && `${api.name} API is unreachable`}
-                          {api.status === 'unknown' && `${api.name} API status unknown`}
-                          {api.responseTime && ` (${api.responseTime}ms)`}
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* App-Specific Health (Services + APIs) */}
+              <AppHealthIndicator app={app} />
 
               {/* Actions */}
               <div className="flex flex-wrap gap-2 pt-2">
@@ -356,6 +306,29 @@ export function CollapsibleAppCard({
                   </>
                 )}
 
+                {/* Spacer to push right-side buttons */}
+                <div className="flex-1" />
+
+                {/* DevTools Button */}
+                {hasDevTools && isLoaded && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                        onClick={handleOpenDevTools}
+                      >
+                        <Wrench className="w-3 h-3" />
+                        DevTools
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">
+                      Open app-specific developer tools
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+
                 {/* Load Button - Primary Action */}
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -363,7 +336,7 @@ export function CollapsibleAppCard({
                       size="sm"
                       variant={isLoaded ? 'secondary' : 'default'}
                       className={cn(
-                        'h-7 text-xs gap-1.5 ml-auto',
+                        'h-7 text-xs gap-1.5',
                         isLoaded && 'bg-primary/20 text-primary border-primary/30'
                       )}
                       onClick={handleLoad}
@@ -398,6 +371,13 @@ export function CollapsibleAppCard({
           </div>
         </div>
       </div>
+
+      {/* App DevTools Drawer */}
+      <AppDevToolsDrawer
+        app={app}
+        isOpen={devToolsOpen}
+        onClose={() => setDevToolsOpen(false)}
+      />
     </TooltipProvider>
   );
 }
