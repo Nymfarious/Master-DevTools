@@ -1,7 +1,7 @@
 // App Registry v3.2.0 - Echoverse apps configuration
 import { LucideIcon } from 'lucide-react';
 import { 
-  Scissors, Music, Film, Layers, Mic, Video
+  Scissors, Music, Film, Layers, Mic, Video, BookOpen
 } from 'lucide-react';
 
 export type AppCategory = 'media' | 'audio' | 'creative' | 'utility';
@@ -116,6 +116,20 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     },
     status: 'development',
     features: ['Timeline editing', 'Frame export', 'Batch processing'],
+  },
+  {
+    id: 'storybook-builder',
+    name: 'Storybook Builder',
+    description: 'Create and organize interactive storybooks with rich text and media',
+    icon: BookOpen,
+    category: 'creative',
+    urls: {
+      github: 'https://github.com/Nymfarious/Storybook-Builder',
+      local: 'http://localhost:5179',
+      lovable: 'https://lovable.dev/projects/3d6719e0-ca22-492d-95be-bb219b4eb4c1',
+    },
+    status: 'development',
+    features: ['Story creation', 'Rich text editing', 'Media integration'],
   },
 ];
 
