@@ -11,7 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const getBasename = () => {
-  if (window.location.hostname.includes('github.io')) {
+  if (window.location.hostname.endsWith('github.io')) {
     return '/Master-DevTools';
   }
   return ''; // Local dev or Lovable
