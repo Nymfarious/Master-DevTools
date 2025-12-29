@@ -10,6 +10,13 @@ import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
+const getBasename = () => {
+  if (window.location.hostname.includes('github.io')) {
+    return '/Master-DevTools';
+  }
+  return ''; // Local dev or Lovable
+};
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -18,7 +25,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename={getBasename()}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
