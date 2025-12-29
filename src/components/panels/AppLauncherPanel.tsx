@@ -1,4 +1,4 @@
-// App Launcher Panel - Primary landing page with compact app cards
+// App Launcher Panel v3.4.0 - Primary landing page with compact app cards
 // Consolidated from Overview + App Launcher panels
 import { useState, useMemo } from 'react';
 import { RefreshCw, Search, Rocket, Zap } from 'lucide-react';
@@ -20,9 +20,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  ECHOVERSE_APPS,
+  APPVERSE_APPS,
   APP_CATEGORIES,
   type AppCategory,
+  type AppverseApp,
+  // Legacy exports for backwards compatibility
+  ECHOVERSE_APPS,
   type EchoverseApp,
 } from '@/config/apps';
 
@@ -30,10 +33,11 @@ type FilterCategory = AppCategory | 'all';
 
 const categoryTabs: { key: FilterCategory; label: string }[] = [
   { key: 'all', label: 'All' },
+  { key: 'devtools', label: 'DevTools' },
+  { key: 'research', label: 'Research' },
   { key: 'media', label: 'Media' },
   { key: 'audio', label: 'Audio' },
   { key: 'creative', label: 'Creative' },
-  { key: 'utility', label: 'Utility' },
 ];
 
 export function AppLauncherPanel() {
@@ -50,7 +54,7 @@ export function AppLauncherPanel() {
   const { endpoints, setEndpointStatus, setChecking } = useAPIHealthStore();
 
   const filteredApps = useMemo(() => {
-    return ECHOVERSE_APPS.filter((app) => {
+    return APPVERSE_APPS.filter((app) => {
       const matchesCategory = category === 'all' || app.category === category;
       const matchesSearch =
         searchQuery === '' ||
@@ -64,10 +68,10 @@ export function AppLauncherPanel() {
   }, [category, searchQuery]);
 
   const counts = useMemo(() => {
-    const result: Record<string, number> = { all: ECHOVERSE_APPS.length };
+    const result: Record<string, number> = { all: APPVERSE_APPS.length };
     categoryTabs.forEach((tab) => {
       if (tab.key !== 'all') {
-        result[tab.key] = ECHOVERSE_APPS.filter(
+        result[tab.key] = APPVERSE_APPS.filter(
           (a) => a.category === tab.key
         ).length;
       }
@@ -78,12 +82,28 @@ export function AppLauncherPanel() {
   const handleRefreshStatus = async () => {
     setIsRefreshing(true);
     const newStatus: Record<string, 'online' | 'offline' | 'unknown'> = {};
-    ECHOVERSE_APPS.forEach((app) => {
+    
+    // Actually ping the local servers
+    for (const app of APPVERSE_APPS) {
       if (app.urls.local) {
-        newStatus[app.id] = Math.random() > 0.5 ? 'online' : 'offline';
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2000);
+          
+          await fetch(app.urls.local, { 
+            method: 'HEAD', 
+            mode: 'no-cors',
+            signal: controller.signal 
+          });
+          
+          clearTimeout(timeoutId);
+          newStatus[app.id] = 'online';
+        } catch {
+          newStatus[app.id] = 'offline';
+        }
       }
-    });
-    await new Promise((r) => setTimeout(r, 800));
+    }
+    
     setLocalStatus(newStatus);
     setIsRefreshing(false);
     toast.success('Local servers pinged');
@@ -105,7 +125,7 @@ export function AppLauncherPanel() {
     setExpandedAppId((prev) => (prev === appId ? null : appId));
   };
 
-  const handleLoadApp = async (app: EchoverseApp) => {
+  const handleLoadApp = async (app: AppverseApp) => {
     await loadApp(app);
     toast.success(`Loaded: ${app.name} v${app.version || '1.0'}`);
     logEvent('info', `App context loaded: ${app.name}`, { appId: app.id }, 'app-launcher');
@@ -129,7 +149,7 @@ export function AppLauncherPanel() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Echoverse Apps
+              Appverse
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">
@@ -170,15 +190,15 @@ export function AppLauncherPanel() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="text-xs max-w-[200px]">
-                  Test connectivity to external API services (Supabase, OpenAI, ElevenLabs, etc.)
+                  Test connectivity to external API services (Supabase, Gemini, ElevenLabs, etc.)
                 </TooltipContent>
               </Tooltip>
             </div>
           </div>
 
           {/* Filter tabs */}
-          <div className="flex items-center gap-4 mb-3">
-            <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg">
+          <div className="flex items-center gap-4 mb-3 flex-wrap">
+            <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg flex-wrap">
               {categoryTabs.map((tab) => (
                 <button
                   key={tab.key}

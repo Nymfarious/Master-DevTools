@@ -10,14 +10,19 @@ import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
+const queryClient = new QueryClient();
+
+// Get basename for GitHub Pages deployment
+// In production: /Master-DevTools/
+// In development: /
 const getBasename = () => {
-  if (window.location.hostname.endsWith('github.io')) {
+  // Check if we're on GitHub Pages
+  if (window.location.hostname.includes('github.io')) {
     return '/Master-DevTools';
   }
-  return ''; // Local dev or Lovable
+  // Local dev or Lovable preview
+  return '';
 };
-
-const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

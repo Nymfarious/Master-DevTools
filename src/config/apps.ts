@@ -1,10 +1,10 @@
-// App Registry v3.3.0 - Echoverse apps configuration with health & devtools
+// App Registry v3.4.0 - Appverse apps configuration with health & devtools
 import { LucideIcon } from 'lucide-react';
 import { 
-  Scissors, Music, Film, Layers, Mic, Video, BookOpen
+  Scissors, Music, Film, Layers, Mic, Video, BookOpen, Search, Terminal
 } from 'lucide-react';
 
-export type AppCategory = 'media' | 'audio' | 'creative' | 'utility';
+export type AppCategory = 'media' | 'audio' | 'creative' | 'utility' | 'research' | 'devtools';
 export type AppStatus = 'ready' | 'development' | 'planned' | 'offline';
 
 // Backend service types this app may depend on
@@ -24,7 +24,7 @@ export interface AppDevToolsConfig {
   customPanels?: string[];
 }
 
-export interface EchoverseApp {
+export interface AppverseApp {
   id: string;
   name: string;
   description: string;
@@ -34,7 +34,6 @@ export interface EchoverseApp {
     github?: string;
     local?: string;
     production?: string;
-    lovable?: string;
   };
   status: AppStatus;
   version?: string;
@@ -45,7 +44,118 @@ export interface EchoverseApp {
   devToolsConfig?: AppDevToolsConfig;
 }
 
-export const ECHOVERSE_APPS: EchoverseApp[] = [
+// Legacy export for backwards compatibility
+export type EchoverseApp = AppverseApp;
+
+export const APPVERSE_APPS: AppverseApp[] = [
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DEVTOOLS
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'master-devtools',
+    name: 'Master DevTools',
+    description: 'Unified monitoring and control center for all Appverse applications',
+    icon: Terminal,
+    category: 'devtools',
+    urls: {
+      github: 'https://github.com/Nymfarious/Master-DevTools',
+      local: 'http://localhost:8080',
+      production: 'https://nymfarious.github.io/Master-DevTools/',
+    },
+    status: 'ready',
+    version: '3.4.0',
+    features: ['App monitoring', 'API registry', 'Pipeline tracking', 'Unified auth'],
+    apiDependencies: ['supabase'],
+    lastUpdated: '2024-12-29',
+    healthConfig: {
+      localPort: 8080,
+      requiredServices: ['database', 'auth'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'data', 'pipeline'],
+    },
+  },
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RESEARCH
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'proveit',
+    name: 'ProveIt',
+    description: 'Personal fact-checker & media bias tracker with reading analytics',
+    icon: Search,
+    category: 'research',
+    urls: {
+      github: 'https://github.com/Nymfarious/ProveIt',
+      local: 'http://localhost:5180',
+      production: 'https://nymfarious.github.io/ProveIt/',
+    },
+    status: 'ready',
+    version: '2.3.3',
+    features: ['Fact-checking', 'Bias tracking', 'Reading analytics', 'Export reports'],
+    apiDependencies: ['supabase', 'newsdata', 'gemini'],
+    lastUpdated: '2024-12-29',
+    healthConfig: {
+      localPort: 5180,
+      requiredServices: ['database', 'auth'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'data', 'pipeline'],
+      customPanels: ['bias-analytics', 'fact-check-queue'],
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // AUDIO
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'juniper',
+    name: 'Juniper Voice Assistant',
+    description: 'Voice-controlled assistant with TTS and speech recognition',
+    icon: Mic,
+    category: 'audio',
+    urls: {
+      github: 'https://github.com/Nymfarious/Juniper-Voice-Assistant',
+      local: 'http://localhost:5177',
+      production: 'https://nymfarious.github.io/Juniper-Voice-Assistant/',
+    },
+    status: 'ready',
+    version: '1.0.0',
+    features: ['Speech recognition', 'TTS', 'Voice commands', 'ElevenLabs integration'],
+    apiDependencies: ['elevenlabs', 'web-speech'],
+    lastUpdated: '2024-12-29',
+    healthConfig: {
+      localPort: 5177,
+    },
+    devToolsConfig: {
+      panels: ['logs', 'audio'],
+    },
+  },
+  {
+    id: 'ddrummer',
+    name: 'dDrummer Rhythm Studio',
+    description: 'Rhythm training app with beat detection and practice modes',
+    icon: Music,
+    category: 'audio',
+    urls: {
+      github: 'https://github.com/Nymfarious/ddrummer-rhythm-studio',
+      local: 'http://localhost:5176',
+    },
+    status: 'development',
+    features: ['Beat detection', 'Practice modes', 'Metronome'],
+    apiDependencies: ['supabase', 'web-audio'],
+    healthConfig: {
+      localPort: 5176,
+      requiredServices: ['database'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'audio', 'data'],
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MEDIA
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     id: 'sprite-slicer',
     name: 'Sprite Slicer Studio',
@@ -94,6 +204,30 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     },
   },
   {
+    id: 'video-extractor',
+    name: 'Video Extractor',
+    description: 'Extract and process video frames with timeline editing',
+    icon: Video,
+    category: 'media',
+    urls: {
+      github: 'https://github.com/Nymfarious/C-dmedia-pipeline',
+      local: 'http://localhost:5178',
+    },
+    status: 'development',
+    features: ['Timeline editing', 'Frame export', 'Batch processing'],
+    healthConfig: {
+      localPort: 5178,
+      requiredServices: ['storage'],
+    },
+    devToolsConfig: {
+      panels: ['logs', 'video', 'pipeline', 'media'],
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CREATIVE
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
     id: 'miku-live-layer',
     name: 'Miku Live Layer Studio',
     description: 'VTuber asset creator with AI image decomposition and expression generation',
@@ -116,68 +250,6 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     },
   },
   {
-    id: 'ddrummer',
-    name: 'dDrummer Rhythm Studio',
-    description: 'Rhythm training app with beat detection and practice modes',
-    icon: Music,
-    category: 'audio',
-    urls: {
-      github: 'https://github.com/Nymfarious/ddrummer-rhythm-studio',
-      local: 'http://localhost:5176',
-    },
-    status: 'development',
-    features: ['Beat detection', 'Practice modes', 'Metronome'],
-    apiDependencies: ['supabase', 'web-audio'],
-    healthConfig: {
-      localPort: 5176,
-      requiredServices: ['database'],
-    },
-    devToolsConfig: {
-      panels: ['logs', 'audio', 'data'],
-    },
-  },
-  {
-    id: 'juniper',
-    name: 'Juniper Voice Assistant',
-    description: 'Voice-controlled assistant with TTS and speech recognition',
-    icon: Mic,
-    category: 'audio',
-    urls: {
-      github: 'https://github.com/Nymfarious/Juniper-Voice-Assistant',
-      local: 'http://localhost:5177',
-      production: 'https://nymfarious.github.io/Juniper-Voice-Assistant/',
-    },
-    status: 'ready',
-    features: ['Speech recognition', 'TTS', 'Voice commands'],
-    apiDependencies: ['elevenlabs', 'web-speech'],
-    healthConfig: {
-      localPort: 5177,
-    },
-    devToolsConfig: {
-      panels: ['logs', 'audio'],
-    },
-  },
-  {
-    id: 'video-extractor',
-    name: 'Video Extractor',
-    description: 'Extract and process video frames with timeline editing',
-    icon: Video,
-    category: 'media',
-    urls: {
-      github: 'https://github.com/Nymfarious/C-dmedia-pipeline',
-      local: 'http://localhost:5178',
-    },
-    status: 'development',
-    features: ['Timeline editing', 'Frame export', 'Batch processing'],
-    healthConfig: {
-      localPort: 5178,
-      requiredServices: ['storage'],
-    },
-    devToolsConfig: {
-      panels: ['logs', 'video', 'pipeline', 'media'],
-    },
-  },
-  {
     id: 'storybook-builder',
     name: 'Storybook Builder',
     description: 'Create and organize interactive storybooks with rich text and media',
@@ -186,7 +258,6 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
     urls: {
       github: 'https://github.com/Nymfarious/Storybook-Builder',
       local: 'http://localhost:5179',
-      lovable: 'https://lovable.dev/projects/3d6719e0-ca22-492d-95be-bb219b4eb4c1',
     },
     status: 'development',
     features: ['Story creation', 'Rich text editing', 'Media integration'],
@@ -201,7 +272,12 @@ export const ECHOVERSE_APPS: EchoverseApp[] = [
   },
 ];
 
+// Legacy export for backwards compatibility
+export const ECHOVERSE_APPS = APPVERSE_APPS;
+
 export const APP_CATEGORIES: Record<AppCategory, { label: string; color: string }> = {
+  devtools: { label: 'DevTools', color: 'bg-emerald-500' },
+  research: { label: 'Research', color: 'bg-amber-500' },
   media: { label: 'Media', color: 'bg-blue-500' },
   audio: { label: 'Audio', color: 'bg-purple-500' },
   creative: { label: 'Creative', color: 'bg-pink-500' },
@@ -216,17 +292,22 @@ export const APP_STATUS_STYLES: Record<AppStatus, { label: string; color: string
 };
 
 // Helper to get apps by category
-export const getAppsByCategory = (category: AppCategory | 'all'): EchoverseApp[] => {
-  if (category === 'all') return ECHOVERSE_APPS;
-  return ECHOVERSE_APPS.filter(app => app.category === category);
+export const getAppsByCategory = (category: AppCategory | 'all'): AppverseApp[] => {
+  if (category === 'all') return APPVERSE_APPS;
+  return APPVERSE_APPS.filter(app => app.category === category);
 };
 
 // Helper to search apps
-export const searchApps = (query: string): EchoverseApp[] => {
+export const searchApps = (query: string): AppverseApp[] => {
   const lower = query.toLowerCase();
-  return ECHOVERSE_APPS.filter(app => 
+  return APPVERSE_APPS.filter(app => 
     app.name.toLowerCase().includes(lower) ||
     app.description.toLowerCase().includes(lower) ||
     app.features?.some(f => f.toLowerCase().includes(lower))
   );
+};
+
+// Helper to get app by ID
+export const getAppById = (id: string): AppverseApp | undefined => {
+  return APPVERSE_APPS.find(app => app.id === id);
 };

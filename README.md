@@ -1,103 +1,132 @@
-# Master DevTools - GitHub Pages Fix
+# Master DevTools v3.4.0 Update
 
-## What's in This Package
+## What's New
+
+### GitHub Pages Fixes (from previous session)
+- **Router basename** - Fixed 404 on `/Master-DevTools/`
+- **Favicon** - Green glowing `>_` terminal icon
+- **Title** - "Master DevTools" (removed Lovable branding)
+- **Asset paths** - Fixed for subdirectory deployment
+
+### Branding Changes
+- **"Echoverse" → "Appverse"** - Renamed throughout the app
+- **Header**: "MASTER DevTools" with glowing terminal icon
+- **Version**: Updated to v3.4.0 in Header, Footer, and all components
+
+### New Apps Added
+| App | Category | Status | Version |
+|-----|----------|--------|---------|
+| **Master DevTools** | DevTools | Ready | 3.4.0 |
+| **ProveIt** | Research | Ready | 2.3.3 |
+| **Juniper Voice Assistant** | Audio | Ready | 1.0.0 |
+
+### New Categories
+- **DevTools** - For development tools (MDT itself)
+- **Research** - For research/fact-checking apps (ProveIt)
+
+### App Card Improvements
+- Real ping to local servers (not mock)
+- New category tabs: DevTools, Research
+- Health config visible in expanded cards
+- Port number and required services shown
+
+## Files to Replace
 
 ```
-MDT-fixes/
+Master-DevTools/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml           ← GitHub Actions for Pages
+│       └── deploy.yml                  ← ADD/REPLACE (GitHub Actions)
 ├── public/
-│   └── favicon.svg              ← Green glowing >_ icon
+│   └── favicon.svg                     ← ADD (green >_ icon)
 ├── src/
+│   ├── App.tsx                         ← REPLACE (router basename fix)
+│   ├── config/
+│   │   └── apps.ts                     ← REPLACE (Appverse, new apps)
 │   └── components/
-│       └── layout/
-│           ├── Footer.tsx       ← Lovable branding removed
-│           └── Header.tsx       ← "MASTER DEVTOOLS" with glow
-├── index.html                   ← Lovable branding removed, fixed paths
-└── vite.config.ts               ← Correct base path for /Master-DevTools/
+│       ├── layout/
+│       │   ├── Header.tsx              ← REPLACE (v3.4.0, branding)
+│       │   └── Footer.tsx              ← REPLACE (v3.4.0)
+│       ├── overview/
+│       │   └── AppverseApps.tsx        ← ADD (renamed from EchoverseApps)
+│       └── panels/
+│           └── AppLauncherPanel.tsx    ← REPLACE (Appverse branding)
+├── index.html                          ← REPLACE (title, favicon, paths)
+└── vite.config.ts                      ← REPLACE (base path)
 ```
-
-## What Was Fixed
-
-| Issue | Fix |
-|-------|-----|
-| **404 on main.tsx** | Changed `src="/src/main.tsx"` to `src="./src/main.tsx"` |
-| **404 on favicon** | Added `favicon.svg` with green >_ icon |
-| **Wrong base path** | Changed to `/Master-DevTools/` (with hyphen) |
-| **Lovable in tab** | Changed title to "Master DevTools" |
-| **Lovable logo** | Replaced with green terminal icon |
-| **Lovable in footer** | Changed "Lovable Cloud" to "Supabase Backend" |
 
 ## How to Apply
 
 ```bash
 cd ~/path/to/Master-DevTools
 
-# 1. Copy files from this package to your repo:
-#    - .github/workflows/deploy.yml → create folders if needed
-#    - public/favicon.svg → replace or add
-#    - src/components/layout/Footer.tsx → replace
-#    - src/components/layout/Header.tsx → replace
-#    - index.html → replace (in root)
-#    - vite.config.ts → replace
+# Copy ALL files from the zip to your repo:
+# 
+# Root level:
+# - index.html → replace
+# - vite.config.ts → replace
+#
+# Folders to create if missing:
+# - .github/workflows/ → create
+# - public/ → already exists
+#
+# Files:
+# - .github/workflows/deploy.yml → add
+# - public/favicon.svg → add
+# - src/App.tsx → replace
+# - src/config/apps.ts → replace
+# - src/components/layout/Header.tsx → replace
+# - src/components/layout/Footer.tsx → replace
+# - src/components/overview/AppverseApps.tsx → ADD (new file)
+# - src/components/panels/AppLauncherPanel.tsx → replace
 
-# 2. Commit and push
 git add .
-git commit -m "Fix GitHub Pages deployment, remove Lovable branding"
+git commit -m "v3.4.0 - Appverse branding, add ProveIt, Juniper, MDT apps"
 git push
 ```
 
-## GitHub Setup Required
+## App Registry (v3.4.0)
 
-### 1. Add Repository Secrets
+### DevTools Category
+- **Master DevTools** - This app (self-monitoring)
 
-Go to: `Settings → Secrets and variables → Actions → New repository secret`
+### Research Category
+- **ProveIt** - Fact-checking & bias tracking
 
-| Secret Name | Value |
-|-------------|-------|
-| `VITE_SUPABASE_URL` | `https://ppgqdzoeonlwcvpozwii.supabase.co` |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Your anon key from .env |
+### Audio Category
+- **Juniper Voice Assistant** - TTS & speech recognition
+- **dDrummer Rhythm Studio** - Beat detection
 
-### 2. Enable GitHub Pages
+### Media Category
+- **Sprite Slicer Studio** - Sprite sheet tools
+- **FramePerfect AI** - Video frame extraction
+- **Video Extractor** - Timeline editing
 
-Go to: `Settings → Pages`
+### Creative Category
+- **Miku Live Layer Studio** - VTuber assets
+- **Storybook Builder** - Interactive stories
 
-- **Source**: Select `GitHub Actions` (NOT "Deploy from a branch")
+## API Dependencies by App
 
-### 3. Push and Wait
+| App | APIs |
+|-----|------|
+| Master DevTools | supabase |
+| ProveIt | supabase, newsdata, gemini |
+| Juniper | elevenlabs, web-speech |
+| dDrummer | supabase, web-audio |
+| Sprite Slicer | supabase |
+| FramePerfect | gemini |
+| Miku Studio | supabase, gemini |
+| Storybook | supabase |
 
-After push:
-1. Go to `Actions` tab
-2. Watch the build
-3. When ✅ green, visit: `https://nymfarious.github.io/Master-DevTools/`
+## Next Steps (v3.5.0)
 
-## URL Support
+1. **Wire up real health monitoring** - Connect progress bars to actual app metrics
+2. **AI Agent tracking** - Monitor agent health per app
+3. **File upload/save tracking** - Track failures in pipeline
+4. **Cross-app communication** - PostMessage bridge for embedded apps
+5. **Shared auth verification** - Test Supabase session sharing
 
-This config works at:
+---
 
-| URL | Notes |
-|-----|-------|
-| `http://localhost:8080` | Local dev (Lovable or npm run dev) |
-| `https://nymfarious.github.io/Master-DevTools/` | GitHub Pages |
-| Lovable preview URLs | Auto-detected as dev mode |
-
-## Troubleshooting
-
-### Still seeing 404?
-
-1. Check repo name matches base path exactly: `Master-DevTools` (hyphen, not underscore)
-2. Verify GitHub Pages source is set to "GitHub Actions"
-3. Check Actions tab for build errors
-
-### Assets not loading?
-
-1. Hard refresh: `Ctrl+Shift+R`
-2. Check browser console for 404s
-3. Verify vite.config.ts has correct base path
-
-### Still seeing Lovable branding?
-
-1. Clear browser cache
-2. Verify index.html was replaced
-3. Check all files were copied correctly
+*"One app to rule them all."*

@@ -45,10 +45,10 @@ export function Header() {
               </div>
             </div>
             <span className="font-display text-sm font-bold tracking-[0.15em] text-foreground uppercase">
-              <span className="text-signal-green">MASTER</span> DEVTOOLS
+              <span className="text-signal-green">Master</span> DevTools
             </span>
           </div>
-          <span className="text-[10px] font-mono text-muted-foreground/60">v3.3.0</span>
+          <span className="text-[10px] font-mono text-muted-foreground/60">v3.4.0</span>
           {hasUnreadErrors && (
             <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-signal-red/20 text-signal-red">
               <AlertCircle className="w-3 h-3" />

@@ -76,7 +76,7 @@ export function Footer() {
             </div>
 
             {/* Version */}
-            <div className="text-muted-foreground">v3.3.0</div>
+            <div className="text-muted-foreground">v3.4.0</div>
 
             {/* Environment badge */}
             <div className="px-1.5 py-0.5 rounded bg-signal-green/20 text-signal-green border border-signal-green/30 text-[10px] uppercase tracking-wider">
