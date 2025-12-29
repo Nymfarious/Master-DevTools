@@ -1,73 +1,103 @@
-# Welcome to your Lovable project
+# Master DevTools - GitHub Pages Fix
 
-## Project info
+## What's in This Package
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+MDT-fixes/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml           ← GitHub Actions for Pages
+├── public/
+│   └── favicon.svg              ← Green glowing >_ icon
+├── src/
+│   └── components/
+│       └── layout/
+│           ├── Footer.tsx       ← Lovable branding removed
+│           └── Header.tsx       ← "MASTER DEVTOOLS" with glow
+├── index.html                   ← Lovable branding removed, fixed paths
+└── vite.config.ts               ← Correct base path for /Master-DevTools/
 ```
 
-**Edit a file directly in GitHub**
+## What Was Fixed
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+| Issue | Fix |
+|-------|-----|
+| **404 on main.tsx** | Changed `src="/src/main.tsx"` to `src="./src/main.tsx"` |
+| **404 on favicon** | Added `favicon.svg` with green >_ icon |
+| **Wrong base path** | Changed to `/Master-DevTools/` (with hyphen) |
+| **Lovable in tab** | Changed title to "Master DevTools" |
+| **Lovable logo** | Replaced with green terminal icon |
+| **Lovable in footer** | Changed "Lovable Cloud" to "Supabase Backend" |
 
-**Use GitHub Codespaces**
+## How to Apply
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+cd ~/path/to/Master-DevTools
 
-## What technologies are used for this project?
+# 1. Copy files from this package to your repo:
+#    - .github/workflows/deploy.yml → create folders if needed
+#    - public/favicon.svg → replace or add
+#    - src/components/layout/Footer.tsx → replace
+#    - src/components/layout/Header.tsx → replace
+#    - index.html → replace (in root)
+#    - vite.config.ts → replace
 
-This project is built with:
+# 2. Commit and push
+git add .
+git commit -m "Fix GitHub Pages deployment, remove Lovable branding"
+git push
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## GitHub Setup Required
 
-## How can I deploy this project?
+### 1. Add Repository Secrets
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Go to: `Settings → Secrets and variables → Actions → New repository secret`
 
-## Can I connect a custom domain to my Lovable project?
+| Secret Name | Value |
+|-------------|-------|
+| `VITE_SUPABASE_URL` | `https://ppgqdzoeonlwcvpozwii.supabase.co` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Your anon key from .env |
 
-Yes, you can!
+### 2. Enable GitHub Pages
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Go to: `Settings → Pages`
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **Source**: Select `GitHub Actions` (NOT "Deploy from a branch")
+
+### 3. Push and Wait
+
+After push:
+1. Go to `Actions` tab
+2. Watch the build
+3. When ✅ green, visit: `https://nymfarious.github.io/Master-DevTools/`
+
+## URL Support
+
+This config works at:
+
+| URL | Notes |
+|-----|-------|
+| `http://localhost:8080` | Local dev (Lovable or npm run dev) |
+| `https://nymfarious.github.io/Master-DevTools/` | GitHub Pages |
+| Lovable preview URLs | Auto-detected as dev mode |
+
+## Troubleshooting
+
+### Still seeing 404?
+
+1. Check repo name matches base path exactly: `Master-DevTools` (hyphen, not underscore)
+2. Verify GitHub Pages source is set to "GitHub Actions"
+3. Check Actions tab for build errors
+
+### Assets not loading?
+
+1. Hard refresh: `Ctrl+Shift+R`
+2. Check browser console for 404s
+3. Verify vite.config.ts has correct base path
+
+### Still seeing Lovable branding?
+
+1. Clear browser cache
+2. Verify index.html was replaced
+3. Check all files were copied correctly

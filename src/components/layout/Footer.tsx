@@ -38,10 +38,10 @@ export function Footer() {
               </TooltipTrigger>
               <TooltipContent side="top" align="start" sideOffset={8} className="max-w-xs ml-4">
                 <div className="space-y-1">
-                  <p className="font-semibold">Lovable Cloud Backend</p>
+                  <p className="font-semibold">Supabase Backend</p>
                   <p className="text-xs text-muted-foreground">
                     Your app's backend infrastructure including database, authentication, 
-                    storage, and edge functions. All backend services are running on Lovable Cloud.
+                    storage, and edge functions. All backend services are running on Supabase.
                   </p>
                 </div>
               </TooltipContent>
@@ -76,7 +76,7 @@ export function Footer() {
             </div>
 
             {/* Version */}
-            <div className="text-muted-foreground">v1.0.0</div>
+            <div className="text-muted-foreground">v3.3.0</div>
 
             {/* Environment badge */}
             <div className="px-1.5 py-0.5 rounded bg-signal-green/20 text-signal-green border border-signal-green/30 text-[10px] uppercase tracking-wider">

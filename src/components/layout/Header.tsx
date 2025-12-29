@@ -37,12 +37,18 @@ export function Header() {
         {/* Left: Logo + Version */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <Terminal className="w-5 h-5 text-signal-green" />
-            <span className="font-display text-sm font-bold tracking-[0.2em] text-foreground uppercase">
-              DEVTOOLS
+            {/* Glowing terminal icon */}
+            <div className="relative">
+              <Terminal className="w-5 h-5 text-signal-green" />
+              <div className="absolute inset-0 w-5 h-5 text-signal-green blur-sm opacity-50">
+                <Terminal className="w-5 h-5" />
+              </div>
+            </div>
+            <span className="font-display text-sm font-bold tracking-[0.15em] text-foreground uppercase">
+              <span className="text-signal-green">MASTER</span> DEVTOOLS
             </span>
           </div>
-          <span className="text-[10px] font-mono text-muted-foreground/60">v3.2.0</span>
+          <span className="text-[10px] font-mono text-muted-foreground/60">v3.3.0</span>
           {hasUnreadErrors && (
             <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-signal-red/20 text-signal-red">
               <AlertCircle className="w-3 h-3" />

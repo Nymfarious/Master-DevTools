@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Outer glow -->
+    <filter id="outerGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#10b981" flood-opacity="0.6"/>
+      <feComposite in2="blur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="#1a1a2e"/>
+  <circle cx="16" cy="16" r="14" fill="none" stroke="#10b981" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Terminal prompt >_ with glow -->
+  <g filter="url(#glow)">
+    <!-- > chevron -->
+    <path d="M8 10 L14 16 L8 22" 
+          fill="none" 
+          stroke="#10b981" 
+          stroke-width="3" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    <!-- _ underscore cursor -->
+    <path d="M17 22 L24 22" 
+          fill="none" 
+          stroke="#10b981" 
+          stroke-width="3" 
+          stroke-linecap="round"/>
+  </g>
+</svg>

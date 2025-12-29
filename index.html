@@ -1,26 +1,37 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Lovable App</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    
+    <!-- Master DevTools Branding -->
+    <title>Master DevTools</title>
+    <meta name="description" content="Echoverse Developer Dashboard - One app to rule them all" />
+    <meta name="author" content="Nymfarious" />
 
-    <!-- TODO: Update og:title to match your application name -->
-    <meta property="og:title" content="Lovable App" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- Favicon - SVG with fallback -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="alternate icon" href="./favicon.ico" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Master DevTools" />
+    <meta property="og:description" content="Echoverse Developer Dashboard - Manage all your apps from one place" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="./og-image.png" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:site" content="@Nymfarious" />
+    <meta name="twitter:title" content="Master DevTools" />
+    <meta name="twitter:description" content="Echoverse Developer Dashboard" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#10b981" />
   </head>
 
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!-- IMPORTANT: Use relative path "./" for GitHub Pages compatibility -->
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
