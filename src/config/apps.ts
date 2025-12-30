@@ -1,4 +1,5 @@
-// App Registry v3.4.0 - Appverse apps configuration with health & devtools
+// App Registry v3.4.1 - Appverse apps configuration with health, devtools & todos
+// UPDATED: Added todos field for hover card status display
 import { LucideIcon } from 'lucide-react';
 import { 
   Scissors, Music, Film, Layers, Mic, Video, BookOpen, Search, Terminal
@@ -24,6 +25,14 @@ export interface AppDevToolsConfig {
   customPanels?: string[];
 }
 
+// NEW: Todo tracking for app cards
+export interface AppTodos {
+  inDev?: string[];              // Currently being built
+  wishlist?: string[];           // Future ideas
+  blocked?: string[];            // Waiting on something
+  recentlyCompleted?: string[];  // Just finished (for changelog feel)
+}
+
 export interface AppverseApp {
   id: string;
   name: string;
@@ -42,6 +51,7 @@ export interface AppverseApp {
   lastUpdated?: string;
   healthConfig?: AppHealthConfig;
   devToolsConfig?: AppDevToolsConfig;
+  todos?: AppTodos;  // NEW
 }
 
 // Legacy export for backwards compatibility
@@ -63,16 +73,31 @@ export const APPVERSE_APPS: AppverseApp[] = [
       production: 'https://nymfarious.github.io/Master-DevTools/',
     },
     status: 'ready',
-    version: '3.4.0',
-    features: ['App monitoring', 'API registry', 'Pipeline tracking', 'Unified auth'],
+    version: '3.4.1',
+    features: ['App monitoring', 'API registry', 'Pipeline tracking', 'Unified auth', 'Todo hover cards'],
     apiDependencies: ['supabase'],
-    lastUpdated: '2024-12-29',
+    lastUpdated: '2024-12-30',
     healthConfig: {
       localPort: 8080,
       requiredServices: ['database', 'auth'],
     },
     devToolsConfig: {
       panels: ['logs', 'data', 'pipeline'],
+    },
+    todos: {
+      recentlyCompleted: [
+        'App card todo hover feature',
+        'Version sync across apps',
+      ],
+      inDev: [
+        'Cross-app localStorage viewer',
+        'Remote DevTools commands',
+      ],
+      wishlist: [
+        'Unified SSO between all apps',
+        'Real-time app health WebSocket',
+        'Deployment status from GitHub Actions',
+      ],
     },
   },
   
@@ -82,7 +107,7 @@ export const APPVERSE_APPS: AppverseApp[] = [
   {
     id: 'proveit',
     name: 'ProveIt',
-    description: 'Personal fact-checker & media bias tracker with reading analytics',
+    description: 'Personal fact-checker & media bias tracker with AI-powered analysis',
     icon: Search,
     category: 'research',
     urls: {
@@ -91,10 +116,18 @@ export const APPVERSE_APPS: AppverseApp[] = [
       production: 'https://nymfarious.github.io/ProveIt/',
     },
     status: 'ready',
-    version: '2.3.3',
-    features: ['Fact-checking', 'Bias tracking', 'Reading analytics', 'Export reports'],
+    version: '3.4.2',  // FIXED: Was 2.3.3
+    features: [
+      'Fact-checking (Gemini AI)',
+      'Media authenticity checker',
+      'Bias tracking',
+      'Reading analytics',
+      'Research Mode (beta)',
+      'Founding documents library',
+      'SCOTUS case analysis',
+    ],
     apiDependencies: ['supabase', 'newsdata', 'gemini'],
-    lastUpdated: '2024-12-29',
+    lastUpdated: '2024-12-30',
     healthConfig: {
       localPort: 5180,
       requiredServices: ['database', 'auth'],
@@ -102,6 +135,27 @@ export const APPVERSE_APPS: AppverseApp[] = [
     devToolsConfig: {
       panels: ['logs', 'data', 'pipeline'],
       customPanels: ['bias-analytics', 'fact-check-queue'],
+    },
+    todos: {
+      recentlyCompleted: [
+        'Remove all contractions from UI',
+        '7-day test data generator',
+        'API key storage clarity',
+      ],
+      inDev: [
+        'Vision API for image analysis (v3.5.0)',
+        'Live source aggregation for Research Mode',
+      ],
+      wishlist: [
+        'Practice paywall integration',
+        'Week-over-week score comparison',
+        'PDF export for reports',
+        'Browser extension',
+        'Juniper voice integration',
+      ],
+      blocked: [
+        'Spectral audio analysis - awaiting API support',
+      ],
     },
   },
 
@@ -130,6 +184,17 @@ export const APPVERSE_APPS: AppverseApp[] = [
     devToolsConfig: {
       panels: ['logs', 'audio'],
     },
+    todos: {
+      inDev: [
+        'ProveIt fact-check voice commands',
+        'Wake word detection',
+      ],
+      wishlist: [
+        'Multiple voice personas',
+        'Conversation memory',
+        'Smart home integration',
+      ],
+    },
   },
   {
     id: 'ddrummer',
@@ -150,6 +215,17 @@ export const APPVERSE_APPS: AppverseApp[] = [
     },
     devToolsConfig: {
       panels: ['logs', 'audio', 'data'],
+    },
+    todos: {
+      inDev: [
+        'BPM detection accuracy',
+        'Practice session recording',
+      ],
+      wishlist: [
+        'MIDI input support',
+        'Drum kit visualizer',
+        'Lesson library',
+      ],
     },
   },
 
@@ -179,6 +255,20 @@ export const APPVERSE_APPS: AppverseApp[] = [
     devToolsConfig: {
       panels: ['logs', 'data', 'media'],
     },
+    todos: {
+      recentlyCompleted: [
+        'OAuth login (Discord, GitHub, Google)',
+        'Supabase storage integration',
+      ],
+      inDev: [
+        'Animation preview panel',
+        'Batch rename tool',
+      ],
+      wishlist: [
+        'AI-powered auto-slice detection',
+        'Sprite animation timeline',
+      ],
+    },
   },
   {
     id: 'perfectframe-ai',
@@ -202,6 +292,16 @@ export const APPVERSE_APPS: AppverseApp[] = [
     devToolsConfig: {
       panels: ['logs', 'video', 'pipeline'],
     },
+    todos: {
+      inDev: [
+        'Batch processing queue',
+        'Quality threshold presets',
+      ],
+      wishlist: [
+        'Scene detection',
+        'Face blur for privacy',
+      ],
+    },
   },
   {
     id: 'video-extractor',
@@ -221,6 +321,16 @@ export const APPVERSE_APPS: AppverseApp[] = [
     },
     devToolsConfig: {
       panels: ['logs', 'video', 'pipeline', 'media'],
+    },
+    todos: {
+      inDev: [
+        'Timeline scrubber',
+        'Keyframe markers',
+      ],
+      wishlist: [
+        'Audio waveform display',
+        'Export to GIF',
+      ],
     },
   },
 
@@ -248,6 +358,17 @@ export const APPVERSE_APPS: AppverseApp[] = [
     devToolsConfig: {
       panels: ['logs', 'media', 'pipeline'],
     },
+    todos: {
+      inDev: [
+        'Layer separation AI',
+        'Expression keyframe editor',
+      ],
+      wishlist: [
+        'Live2D export',
+        'Lip sync automation',
+        'OBS integration',
+      ],
+    },
   },
   {
     id: 'storybook-builder',
@@ -268,6 +389,17 @@ export const APPVERSE_APPS: AppverseApp[] = [
     },
     devToolsConfig: {
       panels: ['logs', 'data', 'content', 'media'],
+    },
+    todos: {
+      inDev: [
+        'Chapter navigation',
+        'Image placement tools',
+      ],
+      wishlist: [
+        'AI illustration generation',
+        'Voice narration (Juniper)',
+        'EPUB export',
+      ],
     },
   },
 ];
@@ -310,4 +442,13 @@ export const searchApps = (query: string): AppverseApp[] => {
 // Helper to get app by ID
 export const getAppById = (id: string): AppverseApp | undefined => {
   return APPVERSE_APPS.find(app => app.id === id);
+};
+
+// NEW: Helper to get apps with pending todos
+export const getAppsWithTodos = (): AppverseApp[] => {
+  return APPVERSE_APPS.filter(app => 
+    app.todos?.inDev?.length || 
+    app.todos?.wishlist?.length || 
+    app.todos?.blocked?.length
+  );
 };
